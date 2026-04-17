@@ -8,3 +8,12 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: packet execution is complete from the Codex side, but the packet remains active until manager review.
 - Recommended next step: manager review and, if accepted, open `F-002 Product Framing`.
+
+## Entry 002
+- Date: 2026-04-17
+- Packet: `F-002 Product Framing`
+- Result: tightened the product layer into one canonical MVP money/income flow with explicit screen ownership and stage outputs.
+- Updated: `02_PRODUCT/USER_FLOWS.md`, `02_PRODUCT/SCREEN_MAP.md`, `02_PRODUCT/UX_PRINCIPLES.md`, `02_PRODUCT/CORE_CYCLE.md`, `02_PRODUCT/MVP_APP_STRUCTURE.md`
+- State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: packet execution is complete from the Codex side, but the packet remains active until manager review.
+- Recommended next step: manager review and, if accepted, open `F-003 Module Boundary Fixation`.

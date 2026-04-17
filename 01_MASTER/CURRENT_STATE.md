@@ -2,7 +2,7 @@
 
 ## Status
 - Date: 2026-04-17
-- Active frontier: `F-001 Repository / Project Brain Initialization`
+- Active frontier: `F-002 Product Framing`
 - Current repository role: documentation-first source-of-truth and execution control system
 - Runtime status: no product runtime, backend, or app implementation is opened yet
 
@@ -18,20 +18,21 @@
 
 ## Current Repository Reality
 - The repository brain skeleton has been initialized from the accepted transcript context.
-- Product framing, module boundaries, and technical model are documented at initial depth.
+- Product framing has been tightened from initial depth into one canonical MVP money/income flow.
+- Screen ownership and product-stage artifacts are explicit across the product layer.
 - Codex execution rules, active packet discipline, and handoff structure are now explicit.
-- The active packet remains `F-001` until manager review closes it and opens the next bounded packet.
+- The active packet is `F-002` and reflects tightened product framing awaiting manager review.
 
 ## Open Items
 - Confirm the preferred external product naming for user-facing language.
-- Tighten product framing from accepted principles into a single MVP user flow packet.
-- Fix module interfaces and structured outputs at implementation-ready depth.
+- Fix module interfaces and structured outputs at implementation-ready depth in `F-003`.
+- Convert product-stage artifacts into formal module contracts.
 - Choose the first executable vertical slice after the documentation phases.
 - Decide the first runtime stack only after `F-004 Tech Model Fixation`.
 
 ## Next Step
-- Manager review of the initialized project brain.
-- If accepted, open `F-002 Product Framing` as the next bounded packet.
+- Manager review of `F-002 Product Framing`.
+- If accepted, open `F-003 Module Boundary Fixation` as the next bounded packet.
 
 ## Execution Model
 - ChatGPT owns direction, prioritization, packet definition, and final decision-making.

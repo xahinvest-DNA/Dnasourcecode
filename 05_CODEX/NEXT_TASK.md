@@ -1,44 +1,45 @@
 # Active Packet
 
 ## Packet ID
-`F-001`
+`F-002`
 
 ## Title
-Repository / Project Brain Initialization
+Product Framing
 
 ## Status
 Active until manager review closes the packet.
 
 ## Objective
-Initialize the repository documentation and management system so the repository becomes the project brain and source-of-truth layer for the product.
+Tighten the product layer from repository-brain depth into manager-ready MVP framing so the MVP is interpreted one way only.
 
 ## In Scope
-- Create the required repository structure.
-- Populate master, product, module, tech, and Codex control docs with accepted context.
-- Establish manager-led execution rules.
-- Establish one-active-packet discipline.
-- Synchronize core state files after initialization.
+- Lock one canonical MVP user flow.
+- Make screen ownership explicit.
+- Clarify the stage sequence from entry through progress fixation.
+- Tighten output boundaries between diagnosis, restructuring, action, and check-in.
+- Synchronize supporting state files after product framing work.
 
 ## Out of Scope
 - Product runtime
 - Backend implementation
-- Frontend implementation
-- App screen code
-- API logic
-- Production infrastructure
+- Tech-layer rewrite
+- New product branches
+- Non-money scenarios
 
 ## Required Deliverables
-- `00_INDEX.md`
-- `01_MASTER/*`
-- `02_PRODUCT/*`
-- `03_MODULES/*`
-- `04_TECH/*`
-- `05_CODEX/*`
+- `02_PRODUCT/USER_FLOWS.md`
+- `02_PRODUCT/SCREEN_MAP.md`
+- `02_PRODUCT/UX_PRINCIPLES.md`
+- `02_PRODUCT/CORE_CYCLE.md`
+- `02_PRODUCT/MVP_APP_STRUCTURE.md`
+- Supporting state sync in `01_MASTER/CURRENT_STATE.md`, `05_CODEX/TASKS.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/CODEX_WORKLOG.md`
 
 ## Completion Criteria
-- Files exist with real initial content.
-- State model, product framing, and execution model are explicit.
-- `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` are synchronized.
+- One canonical MVP flow exists.
+- Screen-by-screen ownership is explicit.
+- Product-stage outputs are explicit.
+- The product layer is ready for `F-003 Module Boundary Fixation`.
+- Supporting state files are synchronized.
 
 ## Sync Requirement
 - Do not open the next packet independently.
