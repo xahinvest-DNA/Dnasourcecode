@@ -17,11 +17,11 @@
 | `02_PRODUCT/CORE_CYCLE.md` | Product intervention logic for old/new cycles | Data schema |
 | `02_PRODUCT/MVP_APP_STRUCTURE.md` | First-version app structure | Technical implementation details |
 | `03_MODULES/*` | Module responsibilities, boundaries, inputs, outputs, non-goals | Live product state and task status |
-| `04_TECH/DOMAIN_MODEL.md` | Entity model | UI flow order |
-| `04_TECH/DATA_SCHEMA.md` | Structured record fields | Human process rules |
-| `04_TECH/STATE_MODEL.md` | Runtime state transitions | Roadmap sequencing |
-| `04_TECH/LLM_ORCHESTRATION.md` | Responsibility split between code, LLM, and DNA | Accepted business decisions |
-| `04_TECH/PROJECT_FILE_FORMAT.md` | Documentation and packet formatting rules | Runtime domain truth |
+| `04_TECH/DOMAIN_MODEL.md` | Technical entities, relationships, artifact ownership, cycle object boundaries | UI flow order or product strategy |
+| `04_TECH/DATA_SCHEMA.md` | Stable schema shape for accepted artifacts and records | Human process rules or new product meaning |
+| `04_TECH/STATE_MODEL.md` | Technical process states and resolution logic for one cycle | Product-thesis redefinition |
+| `04_TECH/LLM_ORCHESTRATION.md` | Technical orchestration boundaries for code, LLM, and DNA | Accepted business decisions or product flow redesign |
+| `04_TECH/PROJECT_FILE_FORMAT.md` | Packet/file discipline for future execution packets | Runtime domain truth |
 | `05_CODEX/NEXT_TASK.md` | One active packet only | Future roadmap and historical decisions |
 | `05_CODEX/TASKS.md` | Full bounded task ledger | Live product state |
 | `05_CODEX/CODEX_WORKLOG.md` | Codex execution history and recommended next step | Active packet definition |

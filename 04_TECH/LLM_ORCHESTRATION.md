@@ -1,35 +1,96 @@
 # LLM Orchestration
 
-## Responsibility Split
+## Purpose
+This document translates accepted ownership boundaries into technical orchestration rules.
+It defines what deterministic code controls, what LLM may generate, what Communication DNA may influence, and where validation and interpretation happen.
 
-### Deterministic Code
-- Owns flow order
-- Owns state transitions
-- Owns persistence
-- Owns packet discipline
-- Owns validation and schema checks
+## Deterministic Code Controls
+- canonical flow order
+- artifact creation order
+- process-state transitions
+- resolution-status recording
+- schema validation
+- one-action guardrail
+- one-diagnosis guardrail
+- persistence of `CycleRecord` and `MemoryRecord`
+- packet discipline in repository execution
 
-### Communication DNA Layer
-- Interprets hidden structure in user language
-- Surfaces resistance and prohibition signals
-- Supports mechanism diagnosis
+## LLM May Generate
+- normalized user-facing wording of accepted artifacts
+- `DiagnosisOutput` phrasing inside the diagnosis contract
+- `RestructuringOutput` inside the restructuring contract
+- `ActionOutput` inside the one-action contract
+- interpretation of check-in language inside the `CheckInOutput` contract
 
-### LLM Layer
-- Converts diagnosis into a user-ready explanation
-- Produces admissible new belief phrasing
-- Generates one bounded micro-action
-- Interprets check-in response inside the fixed schema
+## Communication DNA May Influence
+- hidden-structure cues
+- prohibition signals
+- resistance pattern notes
+- likely self-sabotage point
+- phrasing constraints for diagnosis and restructuring
+
+Communication DNA may influence diagnosis quality and phrasing quality.
+It may not independently route the product flow or assign actions.
+
+## Validation Ownership
+
+### Code-Level Validation
+Deterministic code validates:
+- required fields
+- scenario scope
+- singular artifact constraints
+- allowed state transition order
+- one action only
+- one leading mechanism only
+
+### Module-Level Validation
+Each module validates that its upstream artifact is complete enough for transformation.
+This validation is bounded by the module contract and is enforced by code once implemented.
+
+## Interpretation Ownership
+
+### Communication DNA
+Performs hidden-structure interpretation support.
+
+### Diagnosis Module Using LLM
+Performs leading mechanism interpretation and old-belief interpretation.
+
+### Restructuring Module Using LLM
+Performs admissible reframing interpretation.
+
+### Check-In Module Using LLM
+Performs bounded interpretation of the user's action outcome.
+
+### Progress Memory
+Performs bounded summary interpretation of how the cycle resolved.
+
+## Guardrails Against Flow Drift
+- No generated output may invent a new stage.
+- No generated output may skip an accepted artifact.
+- No generated output may widen the scenario beyond money/income.
+- No generated output may convert the system into open-ended chat.
+
+## Guardrails Against Multi-Action Drift
+- `ActionOutput` may contain one action only.
+- If generated text implies several actions, code must reject or force regeneration.
+- `CheckInOutput` must refer to the assigned action, not an improvised different plan.
+
+## Guardrails Against Diagnosis Drift
+- `DiagnosisOutput` may contain one leading mechanism hypothesis only.
+- Communication DNA may surface multiple cues, but diagnosis must collapse them into one current-cycle hypothesis.
+- Later cycles may revisit or replace the hypothesis, but not within the same cycle artifact set.
+
+## Processing Order
+1. Validate intake scope and completeness
+2. Generate `DnaSupportSignals`
+3. Generate `DiagnosisOutput`
+4. Generate `OldCycleMap`
+5. Generate `RestructuringOutput`
+6. Generate `ActionOutput`
+7. Receive and interpret `CheckInOutput`
+8. Generate `ProgressSnapshot`
+9. Update `MemoryRecord`
 
 ## Orchestration Rule
-- LLM output must fit deterministic schemas.
-- LLM is not allowed to invent a new stage in the flow.
-- DNA output informs diagnosis but does not bypass code-owned transitions.
-
-## MVP Processing Order
-1. Capture intake
-2. Run DNA interpretation
-3. Build leading mechanism hypothesis
-4. Generate old cycle and new cycle
-5. Generate one action
-6. Process check-in
-7. Write progress snapshot
+LLM and Communication DNA operate inside deterministic product boundaries.
+They do not own product meaning, flow routing, or execution authority.

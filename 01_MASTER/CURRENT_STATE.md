@@ -23,19 +23,19 @@
 - Module boundaries and module-owned artifacts are now fixed without changing the canonical MVP flow.
 - Validation versus interpretation is explicitly separated at the module layer.
 - A strategic product-structure layer now defines mechanism, cycle, completed value unit, memory boundaries, and intelligence-layer ownership.
+- The tech layer now formalizes accepted entities, artifact schemas, cycle state logic, orchestration rules, and project-facing packet/file discipline.
 - Codex execution rules, active packet discipline, and handoff structure are now explicit.
 - `F-003` and `F-003a` are complete.
-- The next frontier is `F-004 Tech Model Fixation`, ready and awaiting manager review/opening.
+- `F-004` is complete from the Codex side and awaiting manager review.
 
 ## Open Items
 - Confirm the preferred external product naming for user-facing language.
-- Formalize domain model, data schema, state model, and orchestration on top of the accepted strategic, product, and module contracts in `F-004`.
-- Choose the first executable vertical slice after the documentation phases.
-- Decide the first runtime stack only after `F-004 Tech Model Fixation`.
+- Define the first executable vertical slice in `F-005` without changing accepted product meaning.
+- Decide the first runtime stack only after `F-005` scope is fixed.
 
 ## Next Step
-- Manager review of the completed `F-003a Product Structure Fixation` packet and opening of `F-004 Tech Model Fixation`.
-- After `F-004`, select the first executable vertical slice without changing product meaning.
+- Manager review of `F-004 Tech Model Fixation`.
+- If accepted, open `F-005 First MVP Flow Packet`.
 
 ## Execution Model
 - ChatGPT owns direction, prioritization, packet definition, and final decision-making.

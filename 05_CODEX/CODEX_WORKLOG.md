@@ -36,3 +36,12 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: no contradiction with `F-003` was found; `F-003` is now treated as accepted and `F-004` is the next frontier pending manager review/opening.
 - Recommended next step: manager review and opening of `F-004 Tech Model Fixation`.
+
+## Entry 005
+- Date: 2026-04-17
+- Packet: `F-004 Tech Model Fixation`
+- Result: formalized the technical domain model, artifact schemas, cycle state model, orchestration rules, and project-facing packet/file discipline without changing accepted product meaning.
+- Updated: `04_TECH/DOMAIN_MODEL.md`, `04_TECH/DATA_SCHEMA.md`, `04_TECH/STATE_MODEL.md`, `04_TECH/LLM_ORCHESTRATION.md`, `04_TECH/PROJECT_FILE_FORMAT.md`
+- State sync: `CURRENT_STATE.md`, `SSOT_MAP.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: no contradiction with strategic, product, or module layers was found; packet execution is complete from the Codex side, but the packet remains active until manager review.
+- Recommended next step: manager review and, if accepted, open `F-005 First MVP Flow Packet`.

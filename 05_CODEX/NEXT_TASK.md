@@ -7,7 +7,7 @@
 Tech Model Fixation
 
 ## Status
-Awaiting manager review before execution.
+Active until manager review closes the packet.
 
 ## Objective
 Formalize the technical model on top of the accepted strategic structure, product flow, and module contracts without changing their meaning.
@@ -41,4 +41,4 @@ Formalize the technical model on top of the accepted strategic structure, produc
 
 ## Sync Requirement
 - Do not open the next packet independently.
-- Begin only after manager review confirms the current repository truth is sufficient.
+- Leave this packet active for manager review after execution.
