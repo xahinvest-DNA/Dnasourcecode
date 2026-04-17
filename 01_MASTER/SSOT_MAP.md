@@ -7,6 +7,7 @@
 | `01_MASTER/DECISIONS.md` | Accepted decisions only | Draft ideas, task ledger |
 | `01_MASTER/ROADMAP.md` | Phase order and phase exit criteria | Live execution state |
 | `01_MASTER/SSOT_MAP.md` | Ownership map for truth across docs | Product behavior details |
+| `01_MASTER/PRODUCT_STRUCTURE.md` | Strategic system meaning: mechanism, cycle, value unit, memory boundary, intelligence ownership | Runtime schema or screen-level flow |
 | `01_MASTER/VISION.md` | Product thesis and target outcome | Scope boundaries and implementation rules |
 | `01_MASTER/PRODUCT_SCOPE.md` | In-scope and out-of-scope definition | Phase sequencing |
 | `01_MASTER/MVP_vs_FULL.md` | MVP boundary compared with later expansion | Live packet state |

@@ -9,13 +9,15 @@ It does not own live project state, decisions, or active execution status.
 2. `01_MASTER/DECISIONS.md` - accepted decisions only
 3. `01_MASTER/ROADMAP.md` - phase order and exit criteria
 4. `01_MASTER/SSOT_MAP.md` - document ownership of truth
-5. `05_CODEX/NEXT_TASK.md` - exactly one active Codex packet
+5. `01_MASTER/PRODUCT_STRUCTURE.md` - strategic system meaning before tech formalization
+6. `05_CODEX/NEXT_TASK.md` - exactly one active Codex packet
 
 ## Master Layer
 - `01_MASTER/CURRENT_STATE.md` - where the project stands now
 - `01_MASTER/DECISIONS.md` - approved operating and product decisions
 - `01_MASTER/ROADMAP.md` - bounded phase sequence
 - `01_MASTER/SSOT_MAP.md` - source-of-truth ownership map
+- `01_MASTER/PRODUCT_STRUCTURE.md` - strategic system structure between product truth and tech truth
 - `01_MASTER/VISION.md` - target product outcome and product thesis
 - `01_MASTER/PRODUCT_SCOPE.md` - in-scope and out-of-scope boundaries
 - `01_MASTER/MVP_vs_FULL.md` - MVP versus later expansion

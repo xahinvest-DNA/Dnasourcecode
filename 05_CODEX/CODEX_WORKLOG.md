@@ -26,3 +26,13 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: no contradiction was found that required changing the canonical MVP flow; packet execution is complete from the Codex side, but the packet remains active until manager review.
 - Recommended next step: manager review and, if accepted, open `F-004 Tech Model Fixation`.
+
+## Entry 004
+- Date: 2026-04-17
+- Packet: `F-003a Product Structure Fixation`
+- Result: added the missing strategic structure layer so tech modeling can rely on explicit definitions of mechanism, cycle, value unit, memory boundary, and intelligence ownership.
+- Created: `01_MASTER/PRODUCT_STRUCTURE.md`
+- Updated: `00_INDEX.md`, `01_MASTER/CURRENT_STATE.md`, `01_MASTER/ROADMAP.md`, `01_MASTER/SSOT_MAP.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/TASKS.md`, `05_CODEX/CODEX_WORKLOG.md`
+- State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: no contradiction with `F-003` was found; `F-003` is now treated as accepted and `F-004` is the next frontier pending manager review/opening.
+- Recommended next step: manager review and opening of `F-004 Tech Model Fixation`.

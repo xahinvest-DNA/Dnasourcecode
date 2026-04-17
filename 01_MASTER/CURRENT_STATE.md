@@ -2,7 +2,7 @@
 
 ## Status
 - Date: 2026-04-17
-- Active frontier: `F-003 Module Boundary Fixation`
+- Active frontier: `F-004 Tech Model Fixation`
 - Current repository role: documentation-first source-of-truth and execution control system
 - Runtime status: no product runtime, backend, or app implementation is opened yet
 
@@ -22,18 +22,20 @@
 - Screen ownership and product-stage artifacts are explicit across the product layer.
 - Module boundaries and module-owned artifacts are now fixed without changing the canonical MVP flow.
 - Validation versus interpretation is explicitly separated at the module layer.
+- A strategic product-structure layer now defines mechanism, cycle, completed value unit, memory boundaries, and intelligence-layer ownership.
 - Codex execution rules, active packet discipline, and handoff structure are now explicit.
-- The active packet is `F-003` and reflects fixed module contracts awaiting manager review.
+- `F-003` and `F-003a` are complete.
+- The next frontier is `F-004 Tech Model Fixation`, ready and awaiting manager review/opening.
 
 ## Open Items
 - Confirm the preferred external product naming for user-facing language.
-- Formalize domain model, data schema, state model, and orchestration on top of the accepted module contracts in `F-004`.
+- Formalize domain model, data schema, state model, and orchestration on top of the accepted strategic, product, and module contracts in `F-004`.
 - Choose the first executable vertical slice after the documentation phases.
 - Decide the first runtime stack only after `F-004 Tech Model Fixation`.
 
 ## Next Step
-- Manager review of `F-003 Module Boundary Fixation`.
-- If accepted, open `F-004 Tech Model Fixation` as the next bounded packet.
+- Manager review of the completed `F-003a Product Structure Fixation` packet and opening of `F-004 Tech Model Fixation`.
+- After `F-004`, select the first executable vertical slice without changing product meaning.
 
 ## Execution Model
 - ChatGPT owns direction, prioritization, packet definition, and final decision-making.

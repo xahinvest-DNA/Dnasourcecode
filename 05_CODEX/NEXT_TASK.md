@@ -1,48 +1,44 @@
 # Active Packet
 
 ## Packet ID
-`F-003`
+`F-004`
 
 ## Title
-Module Boundary Fixation
+Tech Model Fixation
 
 ## Status
-Active until manager review closes the packet.
+Awaiting manager review before execution.
 
 ## Objective
-Convert the accepted product-layer framing into formal module boundaries and contracts without changing the canonical MVP flow.
+Formalize the technical model on top of the accepted strategic structure, product flow, and module contracts without changing their meaning.
 
 ## In Scope
-- Freeze the responsibility of each module.
-- Define explicit module inputs and outputs.
-- Define where validation happens and where interpretation happens.
-- Clarify the exact role of the Communication DNA layer inside diagnosis support.
-- Synchronize supporting state files after module-layer work.
+- Formalize domain model.
+- Formalize data schema.
+- Formalize state model.
+- Formalize orchestration rules and structured outputs.
+- Preserve accepted strategic, product, and module meaning.
 
 ## Out of Scope
 - Product runtime
 - Backend implementation
 - Screen redesign
-- Changes to canonical MVP flow unless an actual contradiction is found
+- Reinterpretation of mechanism, cycle, memory boundary, or intelligence ownership
 - Non-money scenarios
 
 ## Required Deliverables
-- `03_MODULES/INTAKE.md`
-- `03_MODULES/MECHANISM_DIAGNOSIS.md`
-- `03_MODULES/CYCLE_RESTRUCTURING.md`
-- `03_MODULES/MICRO_ACTION_ENGINE.md`
-- `03_MODULES/CHECKIN_ENGINE.md`
-- `03_MODULES/PROGRESS_MEMORY.md`
-- `03_MODULES/COMMUNICATION_DNA_LAYER.md`
+- `04_TECH/DOMAIN_MODEL.md`
+- `04_TECH/DATA_SCHEMA.md`
+- `04_TECH/STATE_MODEL.md`
+- `04_TECH/LLM_ORCHESTRATION.md`
+- `04_TECH/PROJECT_FILE_FORMAT.md`
 - Supporting state sync in `01_MASTER/CURRENT_STATE.md`, `05_CODEX/TASKS.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/CODEX_WORKLOG.md`
 
 ## Completion Criteria
-- Module responsibilities are explicit.
-- Module input/output contracts are explicit.
-- Validation versus interpretation ownership is explicit.
-- The module layer is ready for `F-004 Tech Model Fixation`.
-- Supporting state files are synchronized.
+- Technical model can be built without changing strategic/product/module meaning.
+- Domain, data, state, and orchestration truth are explicit.
+- Supporting state files are synchronized after execution.
 
 ## Sync Requirement
 - Do not open the next packet independently.
-- Leave this packet active for manager review after execution.
+- Begin only after manager review confirms the current repository truth is sufficient.

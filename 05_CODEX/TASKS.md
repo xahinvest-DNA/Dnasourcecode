@@ -4,8 +4,9 @@
 | --- | --- | --- | --- |
 | F-001 | Repository / Project Brain Initialization | Complete | Accepted and replaced by the next bounded packet. |
 | F-002 | Product Framing | Complete | Accepted and replaced by the next bounded packet. |
-| F-003 | Module Boundary Fixation | Active | Module contracts fixed; awaiting manager review and packet closure. |
-| F-004 | Tech Model Fixation | Upcoming | Finalize domain model, data schema, state model, and orchestration rules for implementation readiness. |
+| F-003 | Module Boundary Fixation | Complete | Accepted as the operational module-boundary packet. |
+| F-003a | Product Structure Fixation | Complete | Strategic structure layer added to remove ambiguity before tech modeling. |
+| F-004 | Tech Model Fixation | Review Pending | Next frontier; ready to open after manager review of the current repository truth. |
 | F-005 | First MVP Flow Packet | Upcoming | Build one narrow executable vertical slice only after prior phases are accepted. |
 
 ## Ledger Rule
