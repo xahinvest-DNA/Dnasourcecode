@@ -6,8 +6,8 @@
 | F-002 | Product Framing | Complete | Accepted and replaced by the next bounded packet. |
 | F-003 | Module Boundary Fixation | Complete | Accepted as the operational module-boundary packet. |
 | F-003a | Product Structure Fixation | Complete | Strategic structure layer added to remove ambiguity before tech modeling. |
-| F-004 | Tech Model Fixation | Active | Tech layer formalized; awaiting manager review and packet closure. |
-| F-005 | First MVP Flow Packet | Upcoming | Build one narrow executable vertical slice only after prior phases are accepted. |
+| F-004 | Tech Model Fixation | Complete | Accepted technical truth formalized for implementation use. |
+| F-005 | Minimal Executable Restructuring Loop | Active | Runnable local slice implemented; awaiting manager review and packet closure. |
 
 ## Ledger Rule
 - Only one task may hold `Active` status.

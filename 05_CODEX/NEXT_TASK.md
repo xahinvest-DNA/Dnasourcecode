@@ -1,42 +1,51 @@
 # Active Packet
 
 ## Packet ID
-`F-004`
+`F-005`
 
 ## Title
-Tech Model Fixation
+Minimal Executable Restructuring Loop
 
 ## Status
 Active until manager review closes the packet.
 
 ## Objective
-Formalize the technical model on top of the accepted strategic structure, product flow, and module contracts without changing their meaning.
+Build the first narrow executable vertical slice of the product: one end-to-end restructuring cycle for the money/income scenario.
 
 ## In Scope
-- Formalize domain model.
-- Formalize data schema.
-- Formalize state model.
-- Formalize orchestration rules and structured outputs.
-- Preserve accepted strategic, product, and module meaning.
+- Create one executable flow for one `CycleRecord`.
+- Enforce accepted process-state order.
+- Enforce one leading mechanism and one action guardrails.
+- Persist cycle artifacts locally.
+- Support return check-in and final resolution.
+- Provide a minimal UI sufficient for manual testing.
 
 ## Out of Scope
-- Product runtime
-- Backend implementation
-- Screen redesign
-- Reinterpretation of mechanism, cycle, memory boundary, or intelligence ownership
-- Non-money scenarios
+- auth
+- multi-user
+- production infrastructure
+- polished design
+- analytics dashboard
+- domain expansion
+- advanced memory beyond minimum local continuity
+- optimization beyond the accepted flow
 
 ## Required Deliverables
-- `04_TECH/DOMAIN_MODEL.md`
-- `04_TECH/DATA_SCHEMA.md`
-- `04_TECH/STATE_MODEL.md`
-- `04_TECH/LLM_ORCHESTRATION.md`
-- `04_TECH/PROJECT_FILE_FORMAT.md`
+- minimal runtime entrypoint
+- minimal flow orchestration
+- local persistence for cycle records
+- minimal user interface for starting a cycle, seeing artifacts, submitting check-in, and seeing final resolution
+- tests for core flow state order and guardrails
 - Supporting state sync in `01_MASTER/CURRENT_STATE.md`, `05_CODEX/TASKS.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/CODEX_WORKLOG.md`
 
 ## Completion Criteria
-- Technical model can be built without changing strategic/product/module meaning.
-- Domain, data, state, and orchestration truth are explicit.
+- A user can create a cycle from intake input.
+- The system generates accepted artifacts in the correct order.
+- Skipped transitions are rejected.
+- The system does not generate multiple actions.
+- Check-in cannot resolve a cycle before action assignment.
+- A completed cycle stores `ProgressSnapshot` and a non-`none` resolution status.
+- The slice is runnable locally.
 - Supporting state files are synchronized after execution.
 
 ## Sync Requirement
