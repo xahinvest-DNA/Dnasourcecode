@@ -14,13 +14,14 @@ It defines what deterministic code controls, what LLM may generate, what Communi
 - one-diagnosis guardrail
 - persistence of `CycleRecord` and `MemoryRecord`
 - packet discipline in repository execution
+- fallback activation when LLM output is unavailable or invalid
 
 ## LLM May Generate
-- normalized user-facing wording of accepted artifacts
+- Russian user-facing wording of accepted artifacts
 - `DiagnosisOutput` phrasing inside the diagnosis contract
 - `RestructuringOutput` inside the restructuring contract
 - `ActionOutput` inside the one-action contract
-- interpretation of check-in language inside the `CheckInOutput` contract
+- bounded `ProgressSnapshot` phrasing after deterministic resolution is already fixed
 
 ## Communication DNA May Influence
 - hidden-structure cues
@@ -42,6 +43,7 @@ Deterministic code validates:
 - allowed state transition order
 - one action only
 - one leading mechanism only
+- non-empty Russian-ready text fields after generation
 
 ### Module-Level Validation
 Each module validates that its upstream artifact is complete enough for transformation.
@@ -64,6 +66,11 @@ Performs bounded interpretation of the user's action outcome.
 ### Progress Memory
 Performs bounded summary interpretation of how the cycle resolved.
 
+## Narrow Adapter Rule
+- Provider-specific LLM logic should remain inside a narrow adapter layer.
+- The engine may call the adapter, but must not spread provider request logic across the rest of the runtime.
+- If the adapter fails or returns invalid structure, deterministic code must switch to fallback generation without breaking the cycle.
+
 ## Guardrails Against Flow Drift
 - No generated output may invent a new stage.
 - No generated output may skip an accepted artifact.
@@ -83,12 +90,12 @@ Performs bounded summary interpretation of how the cycle resolved.
 ## Processing Order
 1. Validate intake scope and completeness
 2. Generate `DnaSupportSignals`
-3. Generate `DiagnosisOutput`
+3. Generate `DiagnosisOutput` through the LLM adapter or fallback
 4. Generate `OldCycleMap`
-5. Generate `RestructuringOutput`
-6. Generate `ActionOutput`
-7. Receive and interpret `CheckInOutput`
-8. Generate `ProgressSnapshot`
+5. Generate `RestructuringOutput` through the LLM adapter or fallback
+6. Generate `ActionOutput` through the LLM adapter or fallback
+7. Receive `CheckInOutput`
+8. Generate `ProgressSnapshot` phrasing through the LLM adapter or fallback after deterministic resolution
 9. Update `MemoryRecord`
 
 ## Orchestration Rule

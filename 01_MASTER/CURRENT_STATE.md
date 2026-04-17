@@ -2,7 +2,7 @@
 
 ## Status
 - Date: 2026-04-17
-- Active frontier: `F-005 Minimal Executable Restructuring Loop`
+- Active frontier: `F-006 Russian LLM Intelligence Upgrade`
 - Current repository role: documentation-first source-of-truth and execution control system
 - Runtime status: minimal local runtime slice exists; no production backend, multi-user layer, or infrastructure is opened yet
 
@@ -25,18 +25,19 @@
 - A strategic product-structure layer now defines mechanism, cycle, completed value unit, memory boundaries, and intelligence-layer ownership.
 - The tech layer now formalizes accepted entities, artifact schemas, cycle state logic, orchestration rules, and project-facing packet/file discipline.
 - A minimal local runtime now executes one end-to-end money/income restructuring cycle with local persistence, guardrails, and a manual web UI.
+- The runnable slice is now fully Russian in user-facing language and uses a narrow LLM adapter for diagnosis, restructuring, action generation, and bounded progress phrasing, with deterministic fallback preserved.
 - Codex execution rules, active packet discipline, and handoff structure are now explicit.
-- `F-003`, `F-003a`, and `F-004` are complete.
-- `F-005` is complete from the Codex side and awaiting manager review.
+- `F-003`, `F-003a`, `F-004`, and `F-005` are complete.
+- `F-006` is complete from the Codex side and awaiting manager review.
 
 ## Open Items
 - Confirm the preferred external product naming for user-facing language.
-- Decide the next bounded packet after reviewing the executable slice.
-- Strengthen runtime quality only after manager review confirms the slice direction.
+- Decide the next bounded packet after reviewing the Russian LLM-backed slice.
+- Replace or deepen the local heuristic DNA support only if a later packet explicitly opens that work.
 
 ## Next Step
-- Manager review of `F-005 Minimal Executable Restructuring Loop`.
-- If accepted, define the next bounded implementation packet from the new runnable baseline.
+- Manager review of `F-006 Russian LLM Intelligence Upgrade`.
+- If accepted, define the next bounded implementation packet from the Russian LLM-backed baseline.
 
 ## Execution Model
 - ChatGPT owns direction, prioritization, packet definition, and final decision-making.

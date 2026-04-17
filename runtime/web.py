@@ -11,10 +11,94 @@ from runtime.engine import CycleEngine, GuardrailError
 from runtime.storage import LocalJsonStore
 
 
+PROCESS_STATE_LABELS = {
+    "draft": "черновик",
+    "intake_ready": "intake готов",
+    "diagnosed": "диагностика выполнена",
+    "restructured": "перестройка собрана",
+    "action_assigned": "действие назначено",
+    "checkin_received": "check-in получен",
+    "cycle_resolved": "цикл завершён",
+}
+
+RESOLUTION_LABELS = {
+    "none": "ещё не определён",
+    "completed_shifted": "завершён со сдвигом",
+    "completed_partial": "завершён частично",
+    "completed_blocked": "завершён с блокировкой",
+}
+
+COMPLETION_STATUS_LABELS = {
+    "completed": "выполнено",
+    "partial": "частично",
+    "not_completed": "не выполнено",
+}
+
+ARTIFACT_LABELS = {
+    "Intake Record": "Входной артефакт",
+    "DNA Support Signals": "Сигналы DNA-поддержки",
+    "Diagnosis Output": "Результат диагностики",
+    "Old Cycle Map": "Карта старого цикла",
+    "Restructuring Output": "Результат перестройки",
+    "Action Output": "Одно действие",
+    "Check-In Output": "Результат check-in",
+    "Progress Snapshot": "Фиксация прогресса",
+}
+
+FIELD_LABELS = {
+    "artifact_id": "ID артефакта",
+    "cycle_id": "ID цикла",
+    "captured_at": "Время фиксации",
+    "generated_at": "Время генерации",
+    "mapped_at": "Время сборки карты",
+    "recorded_at": "Время фиксации результата",
+    "problem_summary": "Текущая денежная проблема",
+    "repeated_pattern_summary": "Повторяющийся паттерн",
+    "candidate_belief_language": "Кандидаты на скрытое убеждение",
+    "candidate_behavior_clues": "Поведенческие подсказки",
+    "intake_completeness_flag": "Intake заполнен полностью",
+    "source_excerpt": "Желаемый сдвиг",
+    "hidden_structure_cues": "Сигналы скрытой структуры",
+    "prohibition_signals": "Сигналы запрета",
+    "resistance_pattern_notes": "Сигналы сопротивления",
+    "likely_self_sabotage_point": "Вероятная точка самосаботажа",
+    "phrasing_constraints": "Ограничения формулировки",
+    "leading_mechanism_hypothesis": "Ведущая гипотеза механизма",
+    "old_belief_statement": "Старое убеждение",
+    "attention_bias_clue": "Искажение внимания",
+    "behavior_pattern_clue": "Поведенческий след",
+    "reinforcement_logic": "Логика подкрепления",
+    "hidden_prohibition_statement": "Скрытый запрет",
+    "diagnosis_confidence_note": "Примечание к уверенности",
+    "belief": "Убеждение",
+    "attention": "Внимание",
+    "behavior": "Поведение",
+    "result": "Результат",
+    "reinforcement": "Подкрепление",
+    "new_belief": "Новая рабочая формулировка",
+    "new_attention_target": "Новая точка внимания",
+    "new_behavior_direction": "Новое поведенческое направление",
+    "desired_result_marker": "Желаемый маркер результата",
+    "new_reinforcement_statement": "Новая логика подкрепления",
+    "action": "Одно действие",
+    "completion_criterion": "Критерий выполнения",
+    "timeframe": "Срок",
+    "failure_risk_note": "Риск срыва",
+    "completion_status": "Статус выполнения",
+    "observed_external_result": "Наблюдаемый внешний результат",
+    "observed_internal_reaction": "Наблюдаемая внутренняя реакция",
+    "old_cycle_return_note": "Возврат старого цикла",
+    "resolution_status": "Статус завершения",
+    "shift_marker": "Маркер сдвига",
+    "remaining_barrier": "Оставшийся барьер",
+    "memory_update_note": "Заметка для памяти",
+}
+
+
 def run_server(host: str = "127.0.0.1", port: int = 8000, data_dir: str = "data") -> None:
     engine = CycleEngine(LocalJsonStore(Path(data_dir)))
     server = ThreadingHTTPServer((host, port), _build_handler(engine))
-    print(f"Running minimal restructuring loop at http://{host}:{port}")
+    print(f"Локальный цикл перестройки запущен: http://{host}:{port}")
     server.serve_forever()
 
 
@@ -31,11 +115,11 @@ def _build_handler(engine: CycleEngine):
                 try:
                     cycle = engine.store.load_cycle_record(cycle_id)
                 except FileNotFoundError:
-                    self._respond_html(_render_error("Cycle not found."), status=HTTPStatus.NOT_FOUND)
+                    self._respond_html(_render_error("Цикл не найден."), status=HTTPStatus.NOT_FOUND)
                     return
                 self._respond_html(_render_cycle(cycle))
                 return
-            self._respond_html(_render_error("Not found."), status=HTTPStatus.NOT_FOUND)
+            self._respond_html(_render_error("Страница не найдена."), status=HTTPStatus.NOT_FOUND)
 
         def do_POST(self) -> None:  # noqa: N802
             parsed = urlparse(self.path)
@@ -62,7 +146,7 @@ def _build_handler(engine: CycleEngine):
                     )
                     self._redirect(f"/cycles/{cycle_id}")
                     return
-                self._respond_html(_render_error("Unsupported action."), status=HTTPStatus.NOT_FOUND)
+                self._respond_html(_render_error("Действие не поддерживается."), status=HTTPStatus.NOT_FOUND)
             except GuardrailError as error:
                 self._respond_html(_render_error(str(error)), status=HTTPStatus.BAD_REQUEST)
 
@@ -91,26 +175,26 @@ def _render_home(cycles: list[dict]) -> str:
         rows.append(
             "<li>"
             f"<a href='/cycles/{html.escape(cycle['cycle_id'])}'>{html.escape(cycle['cycle_id'])}</a> "
-            f"- state: <strong>{html.escape(cycle['process_state'])}</strong> "
-            f"- resolution: <strong>{html.escape(cycle['resolution_status'])}</strong>"
+            f"- состояние: <strong>{html.escape(_translate_process_state(cycle['process_state']))}</strong> "
+            f"- завершение: <strong>{html.escape(_translate_resolution_status(cycle['resolution_status']))}</strong>"
             "</li>"
         )
-    cycles_html = "<ul>" + "".join(rows) + "</ul>" if rows else "<p>No cycles yet.</p>"
+    cycles_html = "<ul>" + "".join(rows) + "</ul>" if rows else "<p>Пока нет сохранённых циклов.</p>"
     return _page(
-        "Minimal Executable Restructuring Loop",
+        "Минимальный цикл перестройки",
         f"""
-        <h1>Minimal Executable Restructuring Loop</h1>
-        <p>Create one money/income cycle, review generated artifacts, then return with a check-in.</p>
+        <h1>Минимальный цикл перестройки денежного механизма</h1>
+        <p>Создай один цикл по теме денег и дохода, посмотри артефакты, затем вернись с check-in.</p>
         <form method="post" action="/cycles">
-          <label>Current money/income problem</label>
+          <label>Текущая проблема с деньгами или доходом</label>
           <textarea name="problem_summary" required></textarea>
-          <label>Repeated pattern</label>
+          <label>Какой паттерн повторяется снова и снова</label>
           <textarea name="repeated_pattern_summary" required></textarea>
-          <label>Desired shift</label>
+          <label>Какой сдвиг ты хочешь получить</label>
           <textarea name="desired_shift"></textarea>
-          <button type="submit">Start cycle</button>
+          <button type="submit">Запустить цикл</button>
         </form>
-        <h2>Stored cycles</h2>
+        <h2>Сохранённые циклы</h2>
         {cycles_html}
         """,
     )
@@ -131,31 +215,31 @@ def _render_cycle(cycle: dict) -> str:
     if cycle["process_state"] == "action_assigned":
         checkin_form = f"""
         <section>
-          <h2>Submit check-in</h2>
+          <h2>Отправить check-in</h2>
           <form method="post" action="/cycles/{html.escape(cycle['cycle_id'])}/checkin">
-            <label>Completion status</label>
+            <label>Статус выполнения</label>
             <select name="completion_status">
-              <option value="completed">completed</option>
-              <option value="partial">partial</option>
-              <option value="not_completed">not_completed</option>
+              <option value="completed">выполнено</option>
+              <option value="partial">частично</option>
+              <option value="not_completed">не выполнено</option>
             </select>
-            <label>Observed external result</label>
+            <label>Что произошло снаружи</label>
             <textarea name="observed_external_result" required></textarea>
-            <label>Observed internal reaction</label>
+            <label>Что произошло внутри</label>
             <textarea name="observed_internal_reaction" required></textarea>
-            <label>Old cycle return note</label>
+            <label>Как вернулся старый цикл, если он вернулся</label>
             <textarea name="old_cycle_return_note" required></textarea>
-            <button type="submit">Resolve cycle</button>
+            <button type="submit">Завершить цикл</button>
           </form>
         </section>
         """
     return _page(
-        f"Cycle {cycle['cycle_id']}",
+        f"Цикл {cycle['cycle_id']}",
         f"""
-        <p><a href="/">Back to home</a></p>
+        <p><a href="/">Назад на главную</a></p>
         <h1>{html.escape(cycle['cycle_id'])}</h1>
-        <p>Process state: <strong>{html.escape(cycle['process_state'])}</strong></p>
-        <p>Resolution status: <strong>{html.escape(cycle['resolution_status'])}</strong></p>
+        <p>Состояние процесса: <strong>{html.escape(_translate_process_state(cycle['process_state']))}</strong></p>
+        <p>Статус завершения: <strong>{html.escape(_translate_resolution_status(cycle['resolution_status']))}</strong></p>
         {''.join(sections)}
         {checkin_form}
         """,
@@ -163,28 +247,49 @@ def _render_cycle(cycle: dict) -> str:
 
 
 def _artifact_section(title: str, artifact: dict | None) -> str:
+    localized_title = ARTIFACT_LABELS[title]
     if not artifact:
-        return f"<section><h2>{html.escape(title)}</h2><p>Not created yet.</p></section>"
+        return f"<section><h2>{html.escape(localized_title)}</h2><p>Артефакт ещё не создан.</p></section>"
     items = "".join(
-        f"<tr><th>{html.escape(str(key))}</th><td>{html.escape(_format_value(value))}</td></tr>"
+        f"<tr><th>{html.escape(_translate_field_name(str(key)))}</th><td>{html.escape(_format_value(key, value))}</td></tr>"
         for key, value in artifact.items()
     )
-    return f"<section><h2>{html.escape(title)}</h2><table>{items}</table></section>"
+    return f"<section><h2>{html.escape(localized_title)}</h2><table>{items}</table></section>"
 
 
-def _format_value(value) -> str:
+def _translate_field_name(field_name: str) -> str:
+    return FIELD_LABELS.get(field_name, field_name)
+
+
+def _format_value(key: str, value) -> str:
     if isinstance(value, list):
         return ", ".join(str(item) for item in value)
+    if key == "process_state":
+        return _translate_process_state(str(value))
+    if key == "resolution_status":
+        return _translate_resolution_status(str(value))
+    if key == "completion_status":
+        return COMPLETION_STATUS_LABELS.get(str(value), str(value))
+    if isinstance(value, bool):
+        return "да" if value else "нет"
     return str(value)
 
 
+def _translate_process_state(state: str) -> str:
+    return PROCESS_STATE_LABELS.get(state, state)
+
+
+def _translate_resolution_status(status: str) -> str:
+    return RESOLUTION_LABELS.get(status, status)
+
+
 def _render_error(message: str) -> str:
-    return _page("Error", f"<p><a href='/'>Back to home</a></p><h1>Error</h1><p>{html.escape(message)}</p>")
+    return _page("Ошибка", f"<p><a href='/'>Назад на главную</a></p><h1>Ошибка</h1><p>{html.escape(message)}</p>")
 
 
 def _page(title: str, body: str) -> str:
     return f"""<!doctype html>
-<html lang="en">
+<html lang="ru">
 <head>
   <meta charset="utf-8">
   <title>{html.escape(title)}</title>
@@ -243,10 +348,10 @@ def _page(title: str, body: str) -> str:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--host", default="127.0.0.1")
-    parser.add_argument("--port", default=8000, type=int)
-    parser.add_argument("--data-dir", default="data")
+    parser = argparse.ArgumentParser(description="Локальный русский цикл перестройки денежного механизма.")
+    parser.add_argument("--host", default="127.0.0.1", help="Хост для локального сервера.")
+    parser.add_argument("--port", default=8000, type=int, help="Порт локального сервера.")
+    parser.add_argument("--data-dir", default="data", help="Каталог для локального JSON-хранилища.")
     args = parser.parse_args()
     run_server(host=args.host, port=args.port, data_dir=args.data_dir)
 

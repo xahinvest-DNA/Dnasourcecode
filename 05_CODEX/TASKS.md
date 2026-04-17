@@ -7,7 +7,8 @@
 | F-003 | Module Boundary Fixation | Complete | Accepted as the operational module-boundary packet. |
 | F-003a | Product Structure Fixation | Complete | Strategic structure layer added to remove ambiguity before tech modeling. |
 | F-004 | Tech Model Fixation | Complete | Accepted technical truth formalized for implementation use. |
-| F-005 | Minimal Executable Restructuring Loop | Active | Runnable local slice implemented; awaiting manager review and packet closure. |
+| F-005 | Minimal Executable Restructuring Loop | Complete | Accepted as the runnable deterministic baseline. |
+| F-006 | Russian LLM Intelligence Upgrade | Active | Russian-localized LLM-backed slice implemented; awaiting manager review and packet closure. |
 
 ## Ledger Rule
 - Only one task may hold `Active` status.

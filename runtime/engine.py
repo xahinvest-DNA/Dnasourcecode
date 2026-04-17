@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any
 from uuid import uuid4
 
+from runtime.meaning import CompositeMeaningGenerator, build_default_meaning_generator
 from runtime.storage import LocalJsonStore
 
 
@@ -43,6 +44,7 @@ class GuardrailError(ValueError):
 @dataclass
 class CycleEngine:
     store: LocalJsonStore
+    meaning_generator: CompositeMeaningGenerator = field(default_factory=build_default_meaning_generator)
 
     def create_draft_cycle(self, user_id: str = "local-user") -> dict[str, Any]:
         profile = self.store.load_or_create_user_profile(user_id)
@@ -100,7 +102,7 @@ class CycleEngine:
         record = self.store.load_cycle_record(cycle_id)
         self._require_state(record, "draft")
         if not problem_summary.strip() or not repeated_pattern_summary.strip():
-            raise GuardrailError("Problem summary and repeated pattern summary are required.")
+            raise GuardrailError("Нужны описание проблемы и повторяющегося паттерна.")
         intake = {
             "artifact_id": f"intake-{uuid4().hex[:10]}",
             "cycle_id": cycle_id,
@@ -122,9 +124,17 @@ class CycleEngine:
         self._require_state(record, "intake_ready")
         intake = record["intake_record"]
         if not intake or not intake["intake_completeness_flag"]:
-            raise GuardrailError("Cannot diagnose without a complete intake record.")
+            raise GuardrailError("Нельзя строить диагноз без полного Intake Record.")
         dna = self._generate_dna_support(intake)
-        diagnosis = self._generate_diagnosis(intake, dna)
+        diagnosis_data = self.meaning_generator.diagnosis(intake, dna)
+        try:
+            diagnosis = self._validate_diagnosis_output(cycle_id, diagnosis_data)
+        except GuardrailError:
+            diagnosis = self._validate_with_fallback(
+                cycle_id,
+                lambda generator: generator.diagnosis(intake, dna),
+                self._validate_diagnosis_output,
+            )
         old_cycle = self._generate_old_cycle_map(diagnosis)
         record["dna_support_signals"] = dna
         record["diagnosis_output"] = diagnosis
@@ -139,8 +149,16 @@ class CycleEngine:
         diagnosis = record["diagnosis_output"]
         old_cycle = record["old_cycle_map"]
         if not diagnosis or not old_cycle:
-            raise GuardrailError("Diagnosis output and old cycle map must exist before restructuring.")
-        restructuring = self._generate_restructuring(diagnosis, old_cycle, record["dna_support_signals"])
+            raise GuardrailError("Нужны Diagnosis Output и Old Cycle Map перед перестройкой.")
+        restructuring_data = self.meaning_generator.restructuring(diagnosis, old_cycle, record["dna_support_signals"])
+        try:
+            restructuring = self._validate_restructuring_output(cycle_id, restructuring_data)
+        except GuardrailError:
+            restructuring = self._validate_with_fallback(
+                cycle_id,
+                lambda generator: generator.restructuring(diagnosis, old_cycle, record["dna_support_signals"]),
+                self._validate_restructuring_output,
+            )
         record["restructuring_output"] = restructuring
         self._transition_process_state(record, "restructured")
         self._save(record)
@@ -150,11 +168,19 @@ class CycleEngine:
         record = self.store.load_cycle_record(cycle_id)
         self._require_state(record, "restructured")
         if record["action_output"] is not None:
-            raise GuardrailError("The cycle already has an action output.")
+            raise GuardrailError("Для цикла уже существует Action Output.")
         restructuring = record["restructuring_output"]
         if not restructuring:
-            raise GuardrailError("Restructuring output must exist before action assignment.")
-        action = self._generate_action(restructuring)
+            raise GuardrailError("Нужен Restructuring Output перед назначением действия.")
+        action_data = self.meaning_generator.action(restructuring)
+        try:
+            action = self._validate_action_output(cycle_id, action_data)
+        except GuardrailError:
+            action = self._validate_with_fallback(
+                cycle_id,
+                lambda generator: generator.action(restructuring),
+                self._validate_action_output,
+            )
         record["action_output"] = action
         self._transition_process_state(record, "action_assigned")
         self._save(record)
@@ -171,7 +197,7 @@ class CycleEngine:
         record = self.store.load_cycle_record(cycle_id)
         self._require_state(record, "action_assigned")
         if completion_status not in {"completed", "partial", "not_completed"}:
-            raise GuardrailError("Unexpected completion status.")
+            raise GuardrailError("Неожиданный статус выполнения check-in.")
         checkin = {
             "artifact_id": f"checkin-{uuid4().hex[:10]}",
             "cycle_id": cycle_id,
@@ -183,60 +209,161 @@ class CycleEngine:
         }
         record["checkin_output"] = checkin
         self._transition_process_state(record, "checkin_received")
-        progress = self._generate_progress_snapshot(record, checkin)
+        resolution_status = self._resolve_status(checkin)
+        progress_data = self.meaning_generator.progress(record, checkin, resolution_status)
+        try:
+            progress = self._validate_progress_snapshot(cycle_id, resolution_status, progress_data)
+        except GuardrailError:
+            progress = self._validate_with_fallback(
+                cycle_id,
+                lambda generator: generator.progress(record, checkin, resolution_status),
+                lambda fallback_cycle_id, data: self._validate_progress_snapshot(
+                    fallback_cycle_id,
+                    resolution_status,
+                    data,
+                ),
+            )
         record["progress_snapshot"] = progress
-        record["resolution_status"] = progress["resolution_status"]
+        record["resolution_status"] = resolution_status
         self._transition_process_state(record, "cycle_resolved")
         self._update_memory_record(record)
         self._save(record)
         return record
 
+    def _validate_diagnosis_output(self, cycle_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        required = [
+            "leading_mechanism_hypothesis",
+            "old_belief_statement",
+            "attention_bias_clue",
+            "behavior_pattern_clue",
+            "reinforcement_logic",
+            "hidden_prohibition_statement",
+            "diagnosis_confidence_note",
+        ]
+        validated = self._validate_string_fields(data, required, "Diagnosis Output")
+        return {
+            "artifact_id": f"diagnosis-{uuid4().hex[:10]}",
+            "cycle_id": cycle_id,
+            "generated_at": self._now(),
+            **validated,
+        }
+
+    def _validate_restructuring_output(self, cycle_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        required = [
+            "new_belief",
+            "new_attention_target",
+            "new_behavior_direction",
+            "desired_result_marker",
+            "new_reinforcement_statement",
+        ]
+        validated = self._validate_string_fields(data, required, "Restructuring Output")
+        return {
+            "artifact_id": f"restructure-{uuid4().hex[:10]}",
+            "cycle_id": cycle_id,
+            "generated_at": self._now(),
+            **validated,
+        }
+
+    def _validate_action_output(self, cycle_id: str, data: dict[str, Any]) -> dict[str, Any]:
+        required = [
+            "action",
+            "completion_criterion",
+            "timeframe",
+            "failure_risk_note",
+        ]
+        validated = self._validate_string_fields(data, required, "Action Output")
+        return {
+            "artifact_id": f"action-{uuid4().hex[:10]}",
+            "cycle_id": cycle_id,
+            "generated_at": self._now(),
+            **validated,
+        }
+
+    def _validate_progress_snapshot(
+        self,
+        cycle_id: str,
+        resolution_status: str,
+        data: dict[str, Any],
+    ) -> dict[str, Any]:
+        required = ["shift_marker", "remaining_barrier", "memory_update_note"]
+        validated = self._validate_string_fields(data, required, "Progress Snapshot")
+        return {
+            "artifact_id": f"progress-{uuid4().hex[:10]}",
+            "cycle_id": cycle_id,
+            "recorded_at": self._now(),
+            "resolution_status": resolution_status,
+            **validated,
+        }
+
+    def _validate_string_fields(
+        self,
+        data: dict[str, Any],
+        required: list[str],
+        artifact_name: str,
+    ) -> dict[str, str]:
+        if not isinstance(data, dict):
+            raise GuardrailError(f"{artifact_name} должен быть объектом.")
+        validated: dict[str, str] = {}
+        for key in required:
+            value = data.get(key)
+            if not isinstance(value, str) or not value.strip():
+                raise GuardrailError(f"{artifact_name} содержит некорректное поле {key}.")
+            validated[key] = value.strip()
+        return validated
+
+    def _validate_with_fallback(self, cycle_id: str, fallback_call, validator):
+        fallback_generator = getattr(self.meaning_generator, "fallback", None)
+        if fallback_generator is None:
+            raise GuardrailError("LLM-вывод не прошёл валидацию и fallback недоступен.")
+        fallback_data = fallback_call(fallback_generator)
+        return validator(cycle_id, fallback_data)
+
     def _transition_process_state(self, record: dict[str, Any], new_state: str) -> None:
         current = record["process_state"]
         if new_state not in PROCESS_STATES:
-            raise GuardrailError(f"Unknown process state: {new_state}")
+            raise GuardrailError(f"Неизвестное состояние процесса: {new_state}")
         if new_state not in ALLOWED_TRANSITIONS[current]:
-            raise GuardrailError(f"Invalid transition: {current} -> {new_state}")
+            raise GuardrailError(f"Недопустимый переход состояния: {current} -> {new_state}")
         if new_state == "diagnosed" and (record["diagnosis_output"] is None or record["old_cycle_map"] is None):
-            raise GuardrailError("Cannot enter diagnosed without diagnosis output and old cycle map.")
+            raise GuardrailError("Нельзя перейти в diagnosed без Diagnosis Output и Old Cycle Map.")
         if new_state == "restructured" and record["restructuring_output"] is None:
-            raise GuardrailError("Cannot enter restructured without restructuring output.")
+            raise GuardrailError("Нельзя перейти в restructured без Restructuring Output.")
         if new_state == "action_assigned" and record["action_output"] is None:
-            raise GuardrailError("Cannot enter action_assigned without action output.")
+            raise GuardrailError("Нельзя перейти в action_assigned без Action Output.")
         if new_state == "checkin_received" and record["checkin_output"] is None:
-            raise GuardrailError("Cannot enter checkin_received without check-in output.")
+            raise GuardrailError("Нельзя перейти в checkin_received без Check-In Output.")
         if new_state == "cycle_resolved":
             if record["progress_snapshot"] is None:
-                raise GuardrailError("Cannot resolve a cycle without a progress snapshot.")
+                raise GuardrailError("Нельзя завершить цикл без Progress Snapshot.")
             if record["resolution_status"] not in RESOLUTION_STATUSES - {"none"}:
-                raise GuardrailError("Cannot resolve a cycle with resolution_status=none.")
+                raise GuardrailError("Нельзя завершить цикл со статусом resolution_status=none.")
         record["process_state"] = new_state
         record["updated_at"] = self._now()
 
     def _require_state(self, record: dict[str, Any], expected: str) -> None:
         if record["process_state"] != expected:
-            raise GuardrailError(f"Expected state {expected}, got {record['process_state']}.")
+            raise GuardrailError(f"Ожидалось состояние {expected}, получено {record['process_state']}.")
 
     def _extract_candidate_beliefs(self, problem_summary: str, repeated_pattern_summary: str) -> list[str]:
         text = f"{problem_summary} {repeated_pattern_summary}".lower()
         beliefs: list[str] = []
-        if any(token in text for token in ("тяж", "hard", "strain", "впах", "много работ")):
-            beliefs.append("money comes through strain")
-        if any(token in text for token in ("цена", "просить", "ask", "price", "откаж")):
-            beliefs.append("asking for more is risky")
+        if any(token in text for token in ("тяж", "впах", "много работ", "паш")):
+            beliefs.append("деньги приходят только через тяжёлое усилие")
+        if any(token in text for token in ("цен", "стоим", "прос", "откаж", "прода")):
+            beliefs.append("просить больше денег рискованно")
         if not beliefs:
-            beliefs.append("staying small feels safer than claiming more")
+            beliefs.append("оставаться маленьким безопаснее, чем реально расширяться")
         return beliefs[:1]
 
     def _extract_behavior_clues(self, problem_summary: str, repeated_pattern_summary: str) -> list[str]:
         text = f"{problem_summary} {repeated_pattern_summary}".lower()
         clues: list[str] = []
-        if any(token in text for token in ("работ", "впах", "overwork", "hard")):
-            clues.append("adds effort instead of changing leverage")
-        if any(token in text for token in ("цен", "price", "ask", "прос")):
-            clues.append("avoids clean asks or clean pricing")
+        if any(token in text for token in ("работ", "впах", "паш", "выгора", "усили")):
+            clues.append("добавляет усилие вместо смены способа получения результата")
+        if any(token in text for token in ("цен", "прос", "оффер", "предлож", "прода")):
+            clues.append("смягчает цену или избегает прямого денежного запроса")
         if not clues:
-            clues.append("stays inside familiar low-risk patterns")
+            clues.append("удерживает знакомый низкий потолок как будто он безопаснее")
         return clues[:2]
 
     def _generate_dna_support(self, intake: dict[str, Any]) -> dict[str, Any]:
@@ -245,66 +372,35 @@ class CycleEngine:
         prohibitions: list[str] = []
         resistance: list[str] = []
         phrasing: list[str] = []
-        if any(token in text for token in ("тяж", "впах", "hard", "strain")):
-            cues.append("effort-heavy language")
-            prohibitions.append("receiving easily feels unsafe")
-            phrasing.append("avoid extreme easy-money phrasing")
-        if any(token in text for token in ("цен", "price", "прос", "ask")):
-            cues.append("asking-pricing tension")
-            resistance.append("clean asks may trigger rejection fear")
-            phrasing.append("use concrete value language")
+        if any(token in text for token in ("тяж", "впах", "паш", "выжива", "усили")):
+            cues.append("язык перегруза и заслуживания")
+            prohibitions.append("получать легче ощущается небезопасно")
+            phrasing.append("не использовать обещания лёгких денег")
+        if any(token in text for token in ("цен", "прос", "откаж", "прода", "оффер")):
+            cues.append("напряжение вокруг запроса и цены")
+            resistance.append("ясный запрос может активировать страх отказа")
+            phrasing.append("говорить конкретно о ценности, а не общими лозунгами")
         if not cues:
-            cues.append("smallness-preservation language")
-            prohibitions.append("growth may feel destabilizing")
-            phrasing.append("keep reframing incremental")
+            cues.append("язык удержания маленького масштаба")
+            prohibitions.append("рост может ощущаться как риск потери устойчивости")
+            phrasing.append("держать перестройку постепенной")
         return {
             "artifact_id": f"dna-{uuid4().hex[:10]}",
             "cycle_id": intake["cycle_id"],
             "generated_at": self._now(),
             "hidden_structure_cues": cues[:2],
             "prohibition_signals": prohibitions[:1],
-            "resistance_pattern_notes": resistance[:1] or ["default resistance: familiar low ceiling"],
-            "likely_self_sabotage_point": "reverting to familiar low-risk effort",
+            "resistance_pattern_notes": resistance[:1] or ["базовое сопротивление: возврат к привычному низкому потолку"],
+            "likely_self_sabotage_point": "возврат к знакомому способу выживания вместо одного чистого шага",
             "phrasing_constraints": phrasing[:2],
         }
 
-    def _generate_diagnosis(self, intake: dict[str, Any], dna: dict[str, Any]) -> dict[str, Any]:
-        text = f"{intake['problem_summary']} {intake['repeated_pattern_summary']}".lower()
-        if any(token in text for token in ("тяж", "впах", "hard", "strain", "много работ")):
-            mechanism = "money_through_strain"
-            old_belief = "More money comes mainly through heavier effort."
-            attention = "Looks first at workload and difficulty."
-            behavior = "Adds effort before changing pricing or asks."
-            reinforcement = "Low result feels like proof that money is heavy."
-            hidden = "Receiving with less strain feels unsafe."
-        elif any(token in text for token in ("цен", "price", "прос", "ask", "откаж")):
-            mechanism = "underpricing_visibility_avoidance"
-            old_belief = "Asking for more puts acceptance at risk."
-            attention = "Focuses on rejection signals and market resistance."
-            behavior = "Delays clean asks, pricing, or clear offers."
-            reinforcement = "Weak income feels like proof that asking more is dangerous."
-            hidden = "Visibility may cost safety or approval."
-        else:
-            mechanism = "safety_in_smallness"
-            old_belief = "Staying small is safer than claiming more."
-            attention = "Notices reasons to stay within familiar limits."
-            behavior = "Chooses low-expansion moves and keeps income ceiling intact."
-            reinforcement = "Stable but low result feels safer than uncertain growth."
-            hidden = "Growth may threaten emotional stability."
-        return {
-            "artifact_id": f"diagnosis-{uuid4().hex[:10]}",
-            "cycle_id": intake["cycle_id"],
-            "generated_at": self._now(),
-            "leading_mechanism_hypothesis": mechanism,
-            "old_belief_statement": old_belief,
-            "attention_bias_clue": attention,
-            "behavior_pattern_clue": behavior,
-            "reinforcement_logic": reinforcement,
-            "hidden_prohibition_statement": hidden,
-            "diagnosis_confidence_note": f"Built from intake plus DNA cues: {', '.join(dna['hidden_structure_cues'])}",
-        }
-
     def _generate_old_cycle_map(self, diagnosis: dict[str, Any]) -> dict[str, Any]:
+        result_by_mechanism = {
+            "money_through_strain": "Доход остаётся ограниченным, потому что рост всё время пытаются купить только дополнительным напряжением.",
+            "underpricing_visibility_avoidance": "Доход остаётся слабым, потому что ясный запрос или цена так и не предъявляются прямо.",
+            "safety_in_smallness": "Доход остаётся в знакомом потолке, потому что любое расширение быстро сворачивается назад.",
+        }
         return {
             "artifact_id": f"old-cycle-{uuid4().hex[:10]}",
             "cycle_id": diagnosis["cycle_id"],
@@ -312,92 +408,11 @@ class CycleEngine:
             "belief": diagnosis["old_belief_statement"],
             "attention": diagnosis["attention_bias_clue"],
             "behavior": diagnosis["behavior_pattern_clue"],
-            "result": "Income stays constrained or unstable.",
+            "result": result_by_mechanism.get(
+                diagnosis["leading_mechanism_hypothesis"],
+                "Доход остаётся ограниченным и повторяет старую схему.",
+            ),
             "reinforcement": diagnosis["reinforcement_logic"],
-        }
-
-    def _generate_restructuring(
-        self,
-        diagnosis: dict[str, Any],
-        old_cycle_map: dict[str, Any],
-        dna: dict[str, Any] | None,
-    ) -> dict[str, Any]:
-        mechanism = diagnosis["leading_mechanism_hypothesis"]
-        if mechanism == "money_through_strain":
-            new_belief = "Income can move through clearer value and cleaner asks, not only through more strain."
-            attention = "Notice where value already exists but is not being claimed."
-            behavior = "Make one cleaner ask before adding more effort."
-            result = "One concrete moment of claiming value more directly."
-            reinforcement = "A cleaner move can create traction without overload."
-        elif mechanism == "underpricing_visibility_avoidance":
-            new_belief = "A clear ask can be safe and useful, even if not every ask converts."
-            attention = "Notice where uncertainty is coming from unclear pricing rather than true rejection."
-            behavior = "State one cleaner price or offer once."
-            result = "One clearer pricing moment or ask."
-            reinforcement = "Clarity can create signal even before a full yes."
-        else:
-            new_belief = "Small expansion can be safe enough to test."
-            attention = "Notice one place where staying small is automatic rather than necessary."
-            behavior = "Take one controlled expansion step."
-            result = "One bounded act that stretches the old ceiling."
-            reinforcement = "Expansion can stay contained and survivable."
-        if dna and dna["phrasing_constraints"]:
-            reinforcement = f"{reinforcement} Constraint kept: {dna['phrasing_constraints'][0]}."
-        return {
-            "artifact_id": f"restructure-{uuid4().hex[:10]}",
-            "cycle_id": diagnosis["cycle_id"],
-            "generated_at": self._now(),
-            "new_belief": new_belief,
-            "new_attention_target": attention,
-            "new_behavior_direction": behavior,
-            "desired_result_marker": result,
-            "new_reinforcement_statement": reinforcement,
-        }
-
-    def _generate_action(self, restructuring: dict[str, Any]) -> dict[str, Any]:
-        behavior = restructuring["new_behavior_direction"].lower()
-        if "ask" in behavior or "price" in behavior:
-            action = "Send one clear money-related ask or price statement without extra apology."
-            criterion = "One specific message, proposal, or spoken ask is delivered."
-        elif "expansion" in behavior:
-            action = "Make one bounded expansion move that was previously delayed by caution."
-            criterion = "One concrete expansion step is completed and recorded."
-        else:
-            action = "Identify one place where value is already created and state it clearly once."
-            criterion = "One value statement is made in writing or in conversation."
-        return {
-            "artifact_id": f"action-{uuid4().hex[:10]}",
-            "cycle_id": restructuring["cycle_id"],
-            "generated_at": self._now(),
-            "action": action,
-            "completion_criterion": criterion,
-            "timeframe": "within 24 hours",
-            "failure_risk_note": "The main risk is reverting to more effort or more explanation instead of a clean move.",
-        }
-
-    def _generate_progress_snapshot(
-        self,
-        record: dict[str, Any],
-        checkin: dict[str, Any],
-    ) -> dict[str, Any]:
-        status = self._resolve_status(checkin)
-        if status == "completed_shifted":
-            shift = "The user created evidence that the replacement cycle can hold."
-            barrier = "Keep the next cycle narrow so the shift becomes repeatable."
-        elif status == "completed_partial":
-            shift = "There was movement, but the replacement cycle is not yet stable."
-            barrier = "The old cycle still competes with the new one."
-        else:
-            shift = "No meaningful shift marker was established."
-            barrier = "The old cycle remained dominant during the action attempt."
-        return {
-            "artifact_id": f"progress-{uuid4().hex[:10]}",
-            "cycle_id": record["cycle_id"],
-            "recorded_at": self._now(),
-            "resolution_status": status,
-            "shift_marker": shift,
-            "remaining_barrier": barrier,
-            "memory_update_note": "Cycle result stored for later continuity.",
         }
 
     def _resolve_status(self, checkin: dict[str, Any]) -> str:
@@ -410,17 +425,18 @@ class CycleEngine:
             ]
         ).lower()
         positive_tokens = (
-            "sent",
-            "asked",
-            "raised",
-            "clear",
-            "client",
-            "reply",
-            "payment",
-            "calmer",
-            "confidence",
-            "easier",
-            "pricing",
+            "отправ",
+            "сказал",
+            "назвал",
+            "ответ",
+            "оплат",
+            "спокой",
+            "уверен",
+            "легче",
+            "ясн",
+            "цен",
+            "запрос",
+            "оффер",
         )
         if checkin["completion_status"] == "completed" and any(token in combined for token in positive_tokens):
             return "completed_shifted"

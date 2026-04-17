@@ -1,51 +1,47 @@
 # Active Packet
 
 ## Packet ID
-`F-005`
+`F-006`
 
 ## Title
-Minimal Executable Restructuring Loop
+Russian LLM Intelligence Upgrade
 
 ## Status
 Active until manager review closes the packet.
 
 ## Objective
-Build the first narrow executable vertical slice of the product: one end-to-end restructuring cycle for the money/income scenario.
+Upgrade the runnable baseline from heuristic meaning generation to an LLM-backed meaning layer and make the full user-facing slice testable in Russian.
 
 ## In Scope
-- Create one executable flow for one `CycleRecord`.
-- Enforce accepted process-state order.
-- Enforce one leading mechanism and one action guardrails.
-- Persist cycle artifacts locally.
-- Support return check-in and final resolution.
-- Provide a minimal UI sufficient for manual testing.
+- Replace heuristic generation for core meaning artifacts with an LLM-backed layer where appropriate.
+- Preserve deterministic guardrails and accepted state transitions.
+- Fully localize the runnable user-facing slice into Russian.
+- Keep a safe fallback path if LLM generation fails.
+- Extend tests for guardrails, fallback, and Russian rendering.
 
 ## Out of Scope
+- product-flow rewrite
+- module-boundary rewrite
+- domain expansion
 - auth
 - multi-user
-- production infrastructure
-- polished design
-- analytics dashboard
-- domain expansion
-- advanced memory beyond minimum local continuity
-- optimization beyond the accepted flow
+- production infra
+- free chat interface
+- UI polish beyond Russian usability needs
 
 ## Required Deliverables
-- minimal runtime entrypoint
-- minimal flow orchestration
-- local persistence for cycle records
-- minimal user interface for starting a cycle, seeing artifacts, submitting check-in, and seeing final resolution
-- tests for core flow state order and guardrails
+- LLM-backed runtime adapter
+- Russian-localized runnable UI
+- fallback generation path
+- updated runtime tests for guardrails, fallback, and Russian UI basics
 - Supporting state sync in `01_MASTER/CURRENT_STATE.md`, `05_CODEX/TASKS.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/CODEX_WORKLOG.md`
 
 ## Completion Criteria
-- A user can create a cycle from intake input.
-- The system generates accepted artifacts in the correct order.
-- Skipped transitions are rejected.
-- The system does not generate multiple actions.
-- Check-in cannot resolve a cycle before action assignment.
-- A completed cycle stores `ProgressSnapshot` and a non-`none` resolution status.
-- The slice is runnable locally.
+- The product still runs end-to-end locally.
+- Russian is the full primary user-facing language.
+- The user can test the whole cycle in Russian.
+- Deterministic guardrails still hold.
+- LLM-backed artifacts are less template-like than the heuristic baseline when the adapter is available.
 - Supporting state files are synchronized after execution.
 
 ## Sync Requirement
