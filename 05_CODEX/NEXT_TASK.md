@@ -1,44 +1,46 @@
 # Active Packet
 
 ## Packet ID
-`F-002`
+`F-003`
 
 ## Title
-Product Framing
+Module Boundary Fixation
 
 ## Status
 Active until manager review closes the packet.
 
 ## Objective
-Tighten the product layer from repository-brain depth into manager-ready MVP framing so the MVP is interpreted one way only.
+Convert the accepted product-layer framing into formal module boundaries and contracts without changing the canonical MVP flow.
 
 ## In Scope
-- Lock one canonical MVP user flow.
-- Make screen ownership explicit.
-- Clarify the stage sequence from entry through progress fixation.
-- Tighten output boundaries between diagnosis, restructuring, action, and check-in.
-- Synchronize supporting state files after product framing work.
+- Freeze the responsibility of each module.
+- Define explicit module inputs and outputs.
+- Define where validation happens and where interpretation happens.
+- Clarify the exact role of the Communication DNA layer inside diagnosis support.
+- Synchronize supporting state files after module-layer work.
 
 ## Out of Scope
 - Product runtime
 - Backend implementation
-- Tech-layer rewrite
-- New product branches
+- Screen redesign
+- Changes to canonical MVP flow unless an actual contradiction is found
 - Non-money scenarios
 
 ## Required Deliverables
-- `02_PRODUCT/USER_FLOWS.md`
-- `02_PRODUCT/SCREEN_MAP.md`
-- `02_PRODUCT/UX_PRINCIPLES.md`
-- `02_PRODUCT/CORE_CYCLE.md`
-- `02_PRODUCT/MVP_APP_STRUCTURE.md`
+- `03_MODULES/INTAKE.md`
+- `03_MODULES/MECHANISM_DIAGNOSIS.md`
+- `03_MODULES/CYCLE_RESTRUCTURING.md`
+- `03_MODULES/MICRO_ACTION_ENGINE.md`
+- `03_MODULES/CHECKIN_ENGINE.md`
+- `03_MODULES/PROGRESS_MEMORY.md`
+- `03_MODULES/COMMUNICATION_DNA_LAYER.md`
 - Supporting state sync in `01_MASTER/CURRENT_STATE.md`, `05_CODEX/TASKS.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/CODEX_WORKLOG.md`
 
 ## Completion Criteria
-- One canonical MVP flow exists.
-- Screen-by-screen ownership is explicit.
-- Product-stage outputs are explicit.
-- The product layer is ready for `F-003 Module Boundary Fixation`.
+- Module responsibilities are explicit.
+- Module input/output contracts are explicit.
+- Validation versus interpretation ownership is explicit.
+- The module layer is ready for `F-004 Tech Model Fixation`.
 - Supporting state files are synchronized.
 
 ## Sync Requirement

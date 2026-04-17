@@ -1,24 +1,48 @@
 # Communication DNA Layer
 
-## Responsibility
-Act as the diagnostic interpretation layer that extracts hidden structure from the user's language.
+## Purpose
+Provide diagnostic interpretation support inside the diagnosis flow by extracting hidden structure from user language.
 
-## Inputs
-- Raw user text from intake
-- Raw user text from check-in
+## Upstream Input
+- Raw intake text
+- Raw check-in text when available
 - Historical language patterns when available
 
-## Outputs
-- Mechanism hypothesis support
-- Hidden prohibition signals
-- Resistance pattern notes
-- Likely self-sabotage point
-- Useful phrasing constraints for reframing
+## Owned Transformation
+- Surface hidden-structure signals from the user's language
+- Surface likely prohibition, resistance, and self-sabotage cues
+- Surface phrasing constraints that matter for diagnosis and restructuring
 
-## Non-Goals
-- Replacing the deterministic product flow
-- Serving as the whole product surface
-- Producing standalone reports as the product
+## Validation
+- Confirm the support output remains diagnostic in nature
+- Confirm the output is signal support, not final product logic
+- Confirm the layer does not emit a new product stage
+
+## Interpretation
+- Deep language interpretation happens here
+- The layer interprets hidden structure, but only as support to diagnosis and downstream phrasing
+- The layer does not own the final diagnosis artifact and does not own product routing
+
+## Output Artifact
+`DNA Support Signals`
+
+### Required Fields
+- hidden-structure cues
+- prohibition signals
+- resistance pattern notes
+- likely self-sabotage point
+- phrasing constraints
+
+## Exit Condition
+- Diagnosis can use the support signals without yielding control of the flow to this layer
+
+## Must Not Do
+- Replace the diagnosis module
+- Replace deterministic product flow
+- Become the whole product logic
+- Produce standalone reports as the product
+- Assign actions
 
 ## Boundary Rule
-- Communication DNA is a diagnostic layer inside the system, not the system itself.
+- Communication DNA supports hidden-structure diagnosis.
+- Communication DNA does not become the whole product logic.

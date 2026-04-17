@@ -1,25 +1,51 @@
 # Cycle Restructuring Module
 
-## Responsibility
-Translate the old cycle into one admissible new cycle the user can realistically test.
+## Purpose
+Convert the old-cycle understanding into one admissible `Restructuring Output` that defines the target replacement cycle for the current MVP cycle.
 
-## Inputs
-- Leading mechanism hypothesis
-- Old belief
-- Old cycle map
-- User language style and resistance signals
+## Upstream Input
+- `Diagnosis Output`
+- `Old Cycle Map`
+- User language constraints and resistance clues
 
-## Outputs
-- New belief statement
-- New attention target
-- New behavior direction
-- Desired result marker
-- New reinforcement statement
+## Owned Transformation
+- Translate the old belief into one admissible new belief
+- Define one new attention target
+- Define one new behavior direction
+- Define one desired result marker
+- Define one new reinforcement statement
 
-## Non-Goals
-- Extreme opposite beliefs
-- Multi-step cognitive programs
-- Generic motivational content
+## Validation
+- Confirm the input old cycle is complete
+- Confirm the new belief is not an extreme opposite claim
+- Confirm the restructuring output is singular and action-ready
+- Confirm no action has been generated yet
+
+## Interpretation
+- Interpretive reframing happens here
+- This module adapts the replacement cycle to the user's admissible range
+- This module does not decide whether the action is feasible in practice; that belongs to the action module
+
+## Output Artifact
+`Restructuring Output`
+
+### Required Fields
+- new belief
+- new attention target
+- new behavior direction
+- desired result marker
+- new reinforcement statement
+
+## Exit Condition
+- One believable replacement cycle exists and can be translated into one action without redefining the diagnosis
+
+## Must Not Do
+- Return multiple new cycles
+- Generate multiple actions
+- Re-diagnose the user
+- Collapse into generic motivation
+- Expand beyond the money/income scenario
 
 ## Boundary Rule
-- The new cycle must be believable enough to support one real action.
+- Restructuring owns the replacement cycle only.
+- Restructuring does not generate multiple actions.
