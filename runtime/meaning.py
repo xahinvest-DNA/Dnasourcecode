@@ -412,7 +412,7 @@ class OpenAIResponsesMeaningGenerator(MeaningGeneratorProtocol):
             api_key=os.environ.get("OPENAI_API_KEY"),
             model=os.environ.get("OPENAI_MODEL", "gpt-4o-mini"),
             base_url=os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1"),
-            timeout_seconds=int(os.environ.get("OPENAI_TIMEOUT_SECONDS", "30")),
+            timeout_seconds=int(os.environ.get("OPENAI_TIMEOUT_SECONDS", "60")),
         )
 
     def diagnosis(self, intake: dict[str, Any], dna: dict[str, Any]) -> dict[str, str]:
@@ -436,9 +436,20 @@ class OpenAIResponsesMeaningGenerator(MeaningGeneratorProtocol):
             "Ты создаёшь только один артефакт Diagnosis Output для продукта о перестройке денежного цикла. "
             "Пиши только по-русски. Дай ровно одну ведущую гипотезу механизма, без списков альтернатив, "
             "без советов, без действий, без изменения сценария beyond money/income. "
+            "Поле leading_mechanism_hypothesis должно быть не описанием, а ровно одним из следующих канонических label: "
+            "money_through_strain, underpricing_visibility_avoidance, free_value_leakage, "
+            "deferred_money_conversation, value_discount_when_easy, rejection_collapse_pricing, "
+            "sales_avoidance_preparation_loop, safety_in_smallness. "
+            "Правила различения: underpricing_visibility_avoidance = страх прямо назвать цену, смягчение оффера, бонусы вместо суммы; "
+            "free_value_leakage = сначала много бесплатной пользы, потом слишком поздний переход в платный шаг; "
+            "deferred_money_conversation = откладывание разговора о повышении, компенсации или пересмотре денег под видом 'надо ещё доказать'; "
+            "sales_avoidance_preparation_loop = бесконечная подготовка вместо прямого оффера; "
+            "value_discount_when_easy = если мне легко, значит нельзя просить серьёзные деньги; "
+            "rejection_collapse_pricing = после отказа цена сразу падает; "
+            "safety_in_smallness = знакомый маленький потолок ощущается безопаснее расширения. "
             "Старайся различать реальные денежные паттерны: перегруз ради денег, избегание цены, "
             "слив ценности бесплатно, откладывание денежного разговора, обесценивание лёгкого результата, "
-            "откат после отказа, избегание прямого оффера."
+            "откат после отказа, избегание прямого оффера. Все поля должны быть непустыми и короткими, но содержательными."
         )
         return self._request_json(schema_name="diagnosis_output_ru", system_prompt=system, user_payload=payload, schema=schema)
 
@@ -467,7 +478,8 @@ class OpenAIResponsesMeaningGenerator(MeaningGeneratorProtocol):
             "Ты создаёшь только один артефакт Restructuring Output для русского продукта про деньги и доход. "
             "Пиши только по-русски. Новая формулировка должна быть психологически допустимой, "
             "не экстремальной, без действий, без нескольких вариантов. "
-            "Избегай слишком общей терапии и общих фраз про самоценность; перестройка должна быть привязана к денежному паттерну кейса."
+            "Избегай слишком общей терапии, общих фраз про самоценность, доход как абстрактный рост и внешней мотивационной риторики; "
+            "перестройка должна быть привязана к денежному паттерну кейса и оставаться достаточно узкой для одного следующего шага."
         )
         return self._request_json(schema_name="restructuring_output_ru", system_prompt=system, user_payload=payload, schema=schema)
 
@@ -487,7 +499,14 @@ class OpenAIResponsesMeaningGenerator(MeaningGeneratorProtocol):
             "Пиши только по-русски. Разрешено только одно конкретное действие. "
             "Не создавай список шагов, не добавляй второй action, не переосмысляй диагноз. "
             "Действие должно быть рычажным, проверяемым в одном шаге, без расплывчатых формулировок вроде "
-            "'осознай', 'подумай', 'проанализируй', 'начни относиться иначе'."
+            "'осознай', 'подумай', 'проанализируй', 'начни относиться иначе'. "
+            "Не уводи действие в исследование, инвестиции, регистрацию на платформах, курсы, сбор вариантов или составление плана. "
+            "Completion criterion должен фиксировать завершение самого действия пользователем, а не внешний исход вроде отклика клиента, роста дохода или успеха сделки. "
+            "Используй формулировки, где completion criterion содержит один завершённый факт действия: "
+            "'один запрос отправлен', 'одна цена названа', 'один разговор инициирован', 'один оффер отправлен', 'один шаг выполнен'. "
+            "Если кейс про цену, оффер, платный шаг, повышение или расширение, действие должно прямо содержать этот денежный move, а не косвенную подготовку к нему. "
+            "Не используй форматы вроде 'составить список', 'изучить варианты', 'начать искать', 'подготовить план', 'инвестировать в идеи'. "
+            "Формулируй action полной конкретной фразой, обычно не короче 8 слов. Предпочитай короткий горизонт, обычно в течение 24 часов."
         )
         return self._request_json(schema_name="action_output_ru", system_prompt=system, user_payload=payload, schema=schema)
 

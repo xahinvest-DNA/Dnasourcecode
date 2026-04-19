@@ -74,3 +74,13 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: no `OPENAI_API_KEY` was available in the execution environment, so the quality pass strengthened the accepted fallback path and the LLM prompt contract, then added regression coverage for the main weak patterns found.
 - Recommended next step: manager review of the quality pass and, if accepted, open a bounded packet for live LLM calibration or deeper Communication DNA quality rather than widening scope.
+
+## Entry 009
+- Date: 2026-04-19
+- Packet: `F-008 Live LLM Calibration Pass`
+- Result: ran the accepted 8 Russian money/income cases against the live LLM layer, compared live outputs against fallback, and tightened prompts plus deterministic validation around canonical mechanism labels, action drift, outcome-based criteria, and overly terse action contracts.
+- Created: `05_CODEX/F008_LIVE_LLM_REVIEW.md`
+- Updated: `runtime/meaning.py`, `runtime/engine.py`, `tests/test_cycle_engine.py`, `01_MASTER/CURRENT_STATE.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/TASKS.md`, `05_CODEX/CODEX_WORKLOG.md`
+- State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: live LLM quality improved materially after calibration, but it still requires deterministic validation and fallback; it is not trustworthy enough yet as an unguarded standalone meaning layer.
+- Recommended next step: manager review of the live calibration pass and, if accepted, open a narrow quality packet for either `Communication DNA` uplift or one more targeted live calibration pass around remaining mechanism confusion.

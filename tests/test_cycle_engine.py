@@ -53,11 +53,48 @@ class InvalidDiagnosisGenerator(StubMeaningGenerator):
         return result
 
 
+class NonCanonicalDiagnosisGenerator(StubMeaningGenerator):
+    def diagnosis(self, intake, dna):
+        result = super().diagnosis(intake, dna)
+        result["leading_mechanism_hypothesis"] = "Страх отказа мешает говорить о цене прямо."
+        return result
+
+
 class InvalidActionGenerator(StubMeaningGenerator):
     def action(self, restructuring):
         result = super().action(restructuring)
         result["action"] = ["сделай это", "и это тоже"]
         return result
+
+
+class OutcomeBasedActionGenerator(StubMeaningGenerator):
+    def action(self, restructuring):
+        return {
+            "action": "Запрашивать цену выше на свои услуги.",
+            "completion_criterion": "Получение положительного отклика от клиента на новое предложение.",
+            "timeframe": "в течение недели",
+            "failure_risk_note": "Риск - тревога перед реакцией клиента.",
+        }
+
+
+class DriftActionGenerator(StubMeaningGenerator):
+    def action(self, restructuring):
+        return {
+            "action": "Изучить три новых способа инвестирования, используя онлайн-ресурсы или курсы.",
+            "completion_criterion": "Один новый вариант записан и первые шаги к его реализации начаты.",
+            "timeframe": "в течение недели",
+            "failure_risk_note": "Риск - распылиться и не сделать реальный денежный шаг.",
+        }
+
+
+class TerseActionGenerator(StubMeaningGenerator):
+    def action(self, restructuring):
+        return {
+            "action": "Сформулировать и озвучить один чёткий финансовый запрос.",
+            "completion_criterion": "Один запрос озвучен.",
+            "timeframe": "в течение 24 часов",
+            "failure_risk_note": "Риск - снова смягчить формулировку.",
+        }
 
 
 class FailingMeaningGenerator(StubMeaningGenerator):
@@ -201,6 +238,27 @@ class CycleEngineTests(unittest.TestCase):
         self.assertIsInstance(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], str)
         self.assertNotIsInstance(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], list)
 
+    def test_noncanonical_mechanism_label_falls_back(self) -> None:
+        engine = self._engine_with_generator(NonCanonicalDiagnosisGenerator())
+        cycle = engine.create_cycle(
+            problem_summary="Я боюсь прямо назвать цену.",
+            repeated_pattern_summary="Каждый раз смягчаю оффер и ухожу в оправдания.",
+            desired_shift="Хочу один прямой денежный шаг.",
+        )
+        self.assertIn(
+            cycle["diagnosis_output"]["leading_mechanism_hypothesis"],
+            {
+                "money_through_strain",
+                "underpricing_visibility_avoidance",
+                "free_value_leakage",
+                "deferred_money_conversation",
+                "value_discount_when_easy",
+                "rejection_collapse_pricing",
+                "sales_avoidance_preparation_loop",
+                "safety_in_smallness",
+            },
+        )
+
     def test_stub_llm_can_drive_full_cycle(self) -> None:
         engine = self._engine_with_generator(StubMeaningGenerator())
         cycle = engine.create_cycle(
@@ -313,6 +371,46 @@ class CycleEngineTests(unittest.TestCase):
             any(
                 token in cycle["action_output"]["completion_criterion"].lower()
                 for token in ("один", "одна", "запрос", "цена", "отправ")
+            )
+        )
+
+    def test_rejects_outcome_based_completion_criterion(self) -> None:
+        engine = self._engine_with_generator(OutcomeBasedActionGenerator())
+        cycle = engine.create_cycle(
+            problem_summary="Я боюсь повысить цену.",
+            repeated_pattern_summary="Мне кажется, что всё зависит от реакции клиента.",
+            desired_shift="Хочу один ясный внешний шаг.",
+        )
+        self.assertNotIn("получение положительного отклика", cycle["action_output"]["completion_criterion"].lower())
+        self.assertTrue(
+            any(
+                token in cycle["action_output"]["completion_criterion"].lower()
+                for token in ("один", "одна", "назван", "отправ", "инициирован", "выполнен", "озвучен")
+            )
+        )
+
+    def test_rejects_action_drift_into_research_or_investing(self) -> None:
+        engine = self._engine_with_generator(DriftActionGenerator())
+        cycle = engine.create_cycle(
+            problem_summary="Я много работаю, но не делаю более ясных денежных шагов.",
+            repeated_pattern_summary="Я ухожу в новые идеи вместо одного прямого запроса.",
+            desired_shift="Хочу один узкий денежный шаг.",
+        )
+        self.assertNotIn("инвест", cycle["action_output"]["action"].lower())
+        self.assertNotIn("изуч", cycle["action_output"]["action"].lower())
+
+    def test_rejects_terse_completion_criterion(self) -> None:
+        engine = self._engine_with_generator(TerseActionGenerator())
+        cycle = engine.create_cycle(
+            problem_summary="Я работаю слишком много и избегаю прямых денег.",
+            repeated_pattern_summary="Я хочу назвать сумму, но снова всё смягчаю.",
+            desired_shift="Хочу один ясный внешний шаг.",
+        )
+        self.assertNotEqual(cycle["action_output"]["completion_criterion"], "Один запрос озвучен.")
+        self.assertTrue(
+            any(
+                token in cycle["action_output"]["completion_criterion"].lower()
+                for token in ("один", "одна", "отправ", "назван", "инициирован", "выполнен", "озвучен")
             )
         )
 

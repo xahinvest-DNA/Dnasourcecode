@@ -36,6 +36,17 @@ RESOLUTION_STATUSES = {
     "completed_blocked",
 }
 
+CANONICAL_MECHANISMS = {
+    "money_through_strain",
+    "underpricing_visibility_avoidance",
+    "free_value_leakage",
+    "deferred_money_conversation",
+    "value_discount_when_easy",
+    "rejection_collapse_pricing",
+    "sales_avoidance_preparation_loop",
+    "safety_in_smallness",
+}
+
 
 class GuardrailError(ValueError):
     """Raised when the accepted flow or guardrails would be violated."""
@@ -241,6 +252,8 @@ class CycleEngine:
             "diagnosis_confidence_note",
         ]
         validated = self._validate_string_fields(data, required, "Diagnosis Output")
+        if validated["leading_mechanism_hypothesis"] not in CANONICAL_MECHANISMS:
+            raise GuardrailError("Diagnosis Output должен использовать один канонический label механизма.")
         return {
             "artifact_id": f"diagnosis-{uuid4().hex[:10]}",
             "cycle_id": cycle_id,
@@ -327,8 +340,13 @@ class CycleEngine:
             raise GuardrailError("Action Output слишком расплывчатый и не задаёт проверяемый внешний шаг.")
         if any(marker in action_lower for marker in ("\n", ";", "1.", "2.", "•")):
             raise GuardrailError("Action Output не должен превращаться в список или многошаговый план.")
+        if any(token in action_lower for token in ("два ", "две ", "три ", "трех", "трёх", "несколько ", "вариант", "способы", "список")):
+            raise GuardrailError("Action Output не должен расширяться в несколько шагов или вариантов.")
         if len(action.strip()) < 25 or len(criterion.strip()) < 25:
             raise GuardrailError("Action Output слишком короткий и, вероятно, недостаточно конкретный.")
+        drift_markers = ("изуч", "исслед", "инвест", "курс", "платформ", "зарегистр", "составь план", "план диалога", "составить список", "начать искать")
+        if any(marker in action_lower for marker in drift_markers):
+            raise GuardrailError("Action Output ушёл в подготовку, исследование или внешний сценарный drift.")
         alternative_markers = (
             " или назови",
             " или сделай",
@@ -339,6 +357,18 @@ class CycleEngine:
         )
         if any(marker in action_lower for marker in alternative_markers):
             raise GuardrailError("Action Output не должен предлагать несколько альтернативных действий.")
+        outcome_markers = (
+            "получение",
+            "получил",
+            "получена",
+            "положительн",
+            "увеличение дохода",
+            "доход начинает",
+            "доход увелич",
+            "успешно получил",
+        )
+        if any(marker in criterion_lower for marker in outcome_markers):
+            raise GuardrailError("Completion criterion не должен зависеть от внешнего исхода вместо завершения действия.")
         if not any(token in criterion_lower for token in ("один", "одна", "одно", "отправ", "назван", "инициирован", "выполнен", "озвучен")):
             raise GuardrailError("Completion criterion должен быть проверяемым и привязанным к одному действию.")
 
