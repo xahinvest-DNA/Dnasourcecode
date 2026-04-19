@@ -272,6 +272,7 @@ class CycleEngine:
             "failure_risk_note",
         ]
         validated = self._validate_string_fields(data, required, "Action Output")
+        self._enforce_action_quality(validated["action"], validated["completion_criterion"])
         return {
             "artifact_id": f"action-{uuid4().hex[:10]}",
             "cycle_id": cycle_id,
@@ -317,6 +318,29 @@ class CycleEngine:
             raise GuardrailError("LLM-вывод не прошёл валидацию и fallback недоступен.")
         fallback_data = fallback_call(fallback_generator)
         return validator(cycle_id, fallback_data)
+
+    def _enforce_action_quality(self, action: str, criterion: str) -> None:
+        action_lower = action.lower()
+        criterion_lower = criterion.lower()
+        forbidden_starts = ("осознай", "подумай", "проанализируй", "начни относиться", "понаблюдай")
+        if action_lower.startswith(forbidden_starts):
+            raise GuardrailError("Action Output слишком расплывчатый и не задаёт проверяемый внешний шаг.")
+        if any(marker in action_lower for marker in ("\n", ";", "1.", "2.", "•")):
+            raise GuardrailError("Action Output не должен превращаться в список или многошаговый план.")
+        if len(action.strip()) < 25 or len(criterion.strip()) < 25:
+            raise GuardrailError("Action Output слишком короткий и, вероятно, недостаточно конкретный.")
+        alternative_markers = (
+            " или назови",
+            " или сделай",
+            " или отправь",
+            " или выбери",
+            " или напиши",
+            " или инициируй",
+        )
+        if any(marker in action_lower for marker in alternative_markers):
+            raise GuardrailError("Action Output не должен предлагать несколько альтернативных действий.")
+        if not any(token in criterion_lower for token in ("один", "одна", "одно", "отправ", "назван", "инициирован", "выполнен", "озвучен")):
+            raise GuardrailError("Completion criterion должен быть проверяемым и привязанным к одному действию.")
 
     def _transition_process_state(self, record: dict[str, Any], new_state: str) -> None:
         current = record["process_state"]

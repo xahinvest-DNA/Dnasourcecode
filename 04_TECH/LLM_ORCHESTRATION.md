@@ -81,11 +81,18 @@ Performs bounded summary interpretation of how the cycle resolved.
 - `ActionOutput` may contain one action only.
 - If generated text implies several actions, code must reject or force regeneration.
 - `CheckInOutput` must refer to the assigned action, not an improvised different plan.
+- Deterministic code must reject vague introspective action wording that does not produce one externally testable money move.
+- Deterministic code may reject alternative imperative branches such as `или назови` or `или сделай`, but should not reject neutral Russian phrasing that uses `или` inside one coherent action.
 
 ## Guardrails Against Diagnosis Drift
 - `DiagnosisOutput` may contain one leading mechanism hypothesis only.
 - Communication DNA may surface multiple cues, but diagnosis must collapse them into one current-cycle hypothesis.
 - Later cycles may revisit or replace the hypothesis, but not within the same cycle artifact set.
+
+## Quality Calibration Rule
+- Real-case review may tighten prompts, mechanism routing, and validation rules, but must not redefine the accepted artifact contracts.
+- Quality improvements should prefer narrower and more concrete Russian money-pattern language over generic motivation, self-worth framing, or therapy-like abstraction.
+- When the external LLM is unavailable, fallback generation remains valid only if deterministic code can still preserve the same artifact boundaries and guardrails.
 
 ## Processing Order
 1. Validate intake scope and completeness

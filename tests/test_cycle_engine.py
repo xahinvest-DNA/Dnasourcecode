@@ -211,6 +211,111 @@ class CycleEngineTests(unittest.TestCase):
         self.assertEqual(cycle["diagnosis_output"]["diagnosis_confidence_note"], "Тестовый LLM-ответ.")
         self.assertEqual(cycle["action_output"]["action"], "Один раз прямо назвать цену или запрос.")
 
+    def test_real_case_quality_harness(self) -> None:
+        cases = [
+            {
+                "name": "Фрилансер боится поднять цену",
+                "problem": "Я делаю сайты на фрилансе, но уже год беру почти те же деньги и злюсь на себя за это.",
+                "pattern": "Когда доходит до цены, я начинаю смягчать оффер, добавлять бонусы и боюсь назвать сумму прямо.",
+                "shift": "Хочу научиться говорить цену спокойнее и прямее.",
+                "mechanism": "underpricing_visibility_avoidance",
+                "action_contains": "назови цену",
+            },
+            {
+                "name": "Перегруженный специалист",
+                "problem": "Я много работаю, беру дополнительные задачи, но доход растет очень медленно.",
+                "pattern": "Каждый раз думаю, что нужно просто еще сильнее впахивать, и почти не смотрю на другие способы роста.",
+                "shift": "Хочу перестать покупать деньги только усталостью.",
+                "mechanism": "money_through_strain",
+                "action_contains": "денежный запрос",
+            },
+            {
+                "name": "Эксперт с бесплатными консультациями",
+                "problem": "Люди часто просят у меня совет по маркетингу, я много помогаю бесплатно, а потом остаюсь без продаж.",
+                "pattern": "Мне неудобно быстро переводить разговор в деньги, поэтому я сначала отдаю много ценности, а потом теряю момент.",
+                "shift": "Хочу раньше обозначать платный формат.",
+                "mechanism": "free_value_leakage",
+                "action_contains": "платный",
+            },
+            {
+                "name": "Руководитель не просит повышение",
+                "problem": "Я тяну больше ответственности в компании, но уже давно не поднимал вопрос о компенсации.",
+                "pattern": "Каждый раз думаю, что надо еще немного доказать ценность, и откладываю разговор о деньгах.",
+                "shift": "Хочу подготовить один ясный разговор о пересмотре дохода.",
+                "mechanism": "deferred_money_conversation",
+                "action_contains": "разговор",
+            },
+            {
+                "name": "Предприниматель держится за маленький потолок",
+                "problem": "У меня есть небольшой стабильный доход, но как только появляется шанс расшириться, я сам себя торможу.",
+                "pattern": "Я выбираю безопасные маленькие действия и откладываю шаги, которые могут реально увеличить масштаб.",
+                "shift": "Хочу выдержать маленькое, но реальное расширение.",
+                "mechanism": "safety_in_smallness",
+                "action_contains": "расширение",
+            },
+            {
+                "name": "Специалист боится продаж",
+                "problem": "Я хороший специалист, но от самой мысли о продажах и прямых предложениях меня сжимает.",
+                "pattern": "Я долго готовлюсь, улучшаю продукт, но избегаю напрямую писать потенциальным клиентам.",
+                "shift": "Хочу сделать один прямой оффер без долгой подготовки.",
+                "mechanism": "sales_avoidance_preparation_loop",
+                "action_contains": "оффер",
+            },
+            {
+                "name": "Эксперт путает ценность и тяжесть",
+                "problem": "Мне трудно брать хорошие деньги, если задача кажется слишком легкой для меня.",
+                "pattern": "Если я делаю что-то быстро, у меня включается мысль, что за это нельзя просить серьезную сумму.",
+                "shift": "Хочу отделить ценность результата от тяжести процесса.",
+                "mechanism": "value_discount_when_easy",
+                "action_contains": "результат",
+            },
+            {
+                "name": "Страх отказа после одного нет",
+                "problem": "После нескольких отказов мне кажется, что рынок не готов платить мне больше.",
+                "pattern": "Я начинаю занижать цену после первого же холодного ответа и воспринимаю это как знак не лезть выше.",
+                "shift": "Хочу выдерживать отказ без автоматического снижения цены.",
+                "mechanism": "rejection_collapse_pricing",
+                "action_contains": "отказа",
+            },
+        ]
+
+        for case in cases:
+            with self.subTest(case=case["name"]):
+                cycle = self.engine.create_cycle(
+                    problem_summary=case["problem"],
+                    repeated_pattern_summary=case["pattern"],
+                    desired_shift=case["shift"],
+                )
+                self.assertEqual(
+                    cycle["diagnosis_output"]["leading_mechanism_hypothesis"],
+                    case["mechanism"],
+                )
+                self.assertIn(case["action_contains"], cycle["action_output"]["action"].lower())
+
+    def test_rejects_vague_action_output(self) -> None:
+        class VagueActionGenerator(StubMeaningGenerator):
+            def action(self, restructuring):
+                return {
+                    "action": "Осознай свой страх и подумай о деньгах иначе.",
+                    "completion_criterion": "Пойми, что ты готов к новому уровню.",
+                    "timeframe": "сегодня",
+                    "failure_risk_note": "Риск - сомневаться.",
+                }
+
+        engine = self._engine_with_generator(VagueActionGenerator())
+        cycle = engine.create_cycle(
+            problem_summary="Я боюсь называть деньги.",
+            repeated_pattern_summary="Я снова ухожу в общие размышления вместо конкретного запроса.",
+            desired_shift="Хочу один внешний шаг.",
+        )
+        self.assertNotIn("осознай", cycle["action_output"]["action"].lower())
+        self.assertTrue(
+            any(
+                token in cycle["action_output"]["completion_criterion"].lower()
+                for token in ("один", "одна", "запрос", "цена", "отправ")
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

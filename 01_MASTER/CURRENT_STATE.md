@@ -1,8 +1,8 @@
 # Current State
 
 ## Status
-- Date: 2026-04-17
-- Active frontier: `F-006 Russian LLM Intelligence Upgrade`
+- Date: 2026-04-19
+- Active frontier: `F-007 Real Case Quality Pass`
 - Current repository role: documentation-first source-of-truth and execution control system
 - Runtime status: minimal local runtime slice exists; no production backend, multi-user layer, or infrastructure is opened yet
 
@@ -26,18 +26,21 @@
 - The tech layer now formalizes accepted entities, artifact schemas, cycle state logic, orchestration rules, and project-facing packet/file discipline.
 - A minimal local runtime now executes one end-to-end money/income restructuring cycle with local persistence, guardrails, and a manual web UI.
 - The runnable slice is now fully Russian in user-facing language and uses a narrow LLM adapter for diagnosis, restructuring, action generation, and bounded progress phrasing, with deterministic fallback preserved.
+- Real-case quality review has now been executed against 8 Russian money/income cases, with strengthened fallback meaning quality, tighter action-quality guardrails, and regression coverage for the main weak patterns found.
 - Codex execution rules, active packet discipline, and handoff structure are now explicit.
 - `F-003`, `F-003a`, `F-004`, and `F-005` are complete.
-- `F-006` is complete from the Codex side and awaiting manager review.
+- `F-006` is complete.
+- `F-007` is complete from the Codex side and awaiting manager review.
 
 ## Open Items
 - Confirm the preferred external product naming for user-facing language.
-- Decide the next bounded packet after reviewing the Russian LLM-backed slice.
+- Decide the next bounded packet after reviewing the real-case quality pass.
 - Replace or deepen the local heuristic DNA support only if a later packet explicitly opens that work.
+- Decide whether the next quality packet should focus on live LLM calibration, stronger Communication DNA signals, or broader Russian case coverage.
 
 ## Next Step
-- Manager review of `F-006 Russian LLM Intelligence Upgrade`.
-- If accepted, define the next bounded implementation packet from the Russian LLM-backed baseline.
+- Manager review of `F-007 Real Case Quality Pass`.
+- If accepted, open a bounded quality-calibration packet rather than widening product scope.
 
 ## Execution Model
 - ChatGPT owns direction, prioritization, packet definition, and final decision-making.

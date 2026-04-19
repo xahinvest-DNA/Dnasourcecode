@@ -64,3 +64,13 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: deterministic state transitions, validation, and persistence remain authoritative; if the LLM adapter is unavailable or returns invalid structure, the cycle falls back to internal generation without breaking the flow.
 - Recommended next step: manager review of the Russian LLM-backed slice and definition of the next bounded implementation packet.
+
+## Entry 008
+- Date: 2026-04-19
+- Packet: `F-007 Real Case Quality Pass`
+- Result: executed a real-case quality review across 8 Russian money/income cases and tightened fallback mechanism routing, prompt constraints, and action-quality guardrails without changing the accepted cycle.
+- Created: `05_CODEX/F007_QUALITY_REVIEW.md`
+- Updated: `runtime/meaning.py`, `runtime/engine.py`, `tests/test_cycle_engine.py`, `01_MASTER/CURRENT_STATE.md`, `04_TECH/LLM_ORCHESTRATION.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/TASKS.md`, `05_CODEX/CODEX_WORKLOG.md`
+- State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: no `OPENAI_API_KEY` was available in the execution environment, so the quality pass strengthened the accepted fallback path and the LLM prompt contract, then added regression coverage for the main weak patterns found.
+- Recommended next step: manager review of the quality pass and, if accepted, open a bounded packet for live LLM calibration or deeper Communication DNA quality rather than widening scope.
