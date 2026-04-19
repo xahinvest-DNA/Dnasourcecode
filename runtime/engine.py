@@ -416,7 +416,7 @@ class CycleEngine:
             clues.append("добавляет усилие вместо смены способа получения результата")
         if any(token in text for token in ("цен", "прос", "оффер", "предлож", "прода")):
             clues.append("смягчает цену или избегает прямого денежного запроса")
-        if any(token in text for token in ("бесплат", "до оплат", "до сделки", "платн", "разбор", "консульт")):
+        if self._has_affirmed_free_value_phase(text):
             clues.append("сначала даёт ценность, а платный переход обозначает слишком поздно")
         if any(token in text for token in ("отклады", "надо еще", "надо ещё", "доказать ценность", "пересмотр", "компенсац", "зарплат")):
             clues.append("откладывает денежный разговор под видом дополнительного доказательства ценности")
@@ -434,22 +434,12 @@ class CycleEngine:
 
         has_overload = self._has_any(text, "тяж", "впах", "паш", "выжива", "усили")
         has_price_tension = self._has_any(text, "цен", "прос", "откаж", "прода", "оффер", "деньг")
-        has_free_value = self._has_any(
-            text,
-            "бесплат",
-            "до оплат",
-            "до сделки",
-            "разбор",
-            "консульт",
-            "совет",
-            "даю решение",
-            "много помогаю",
-            "полезн",
-        )
+        has_free_value = self._has_affirmed_free_value_phase(text)
         has_paid_boundary = self._has_any(text, "платн", "оплат", "деньги", "стоимость", "предложени")
         has_delay = self._has_any(text, "отклады", "потом", "позже", "перенош", "не поднимал", "следующ")
         has_proof_loop = self._has_any(text, "доказать ценность", "надо еще", "надо ещё", "еще доказ", "ещё доказ", "сначала надо")
         has_compensation_context = self._has_any(text, "компенсац", "пересмотр", "повышен", "зарплат", "условий")
+        has_soft_price = self._has_any(text, "смягча", "бонус", "не называ", "не наз", "мягко", "намека", "расплыв", "осторожно")
 
         if any(token in text for token in ("тяж", "впах", "паш", "выжива", "усили")):
             cues.append("язык перегруза и заслуживания")
@@ -477,6 +467,15 @@ class CycleEngine:
             resistance.append("после бесплатной пользы разговор о деньгах переносится, как будто право на платный шаг ещё не возникло")
             phrasing.append("если delay возник уже после бесплатно отданной ценности, усиливать различение в сторону free_value_leakage, а не deferred_money_conversation")
             sabotage_point = "снова отдать ценность бесплатно и отложить платный переход ещё на один круг контакта"
+        if has_free_value and has_soft_price:
+            cues.append("после уже отданной бесплатно ценности цена смягчается слишком поздно вместо прямой платной границы")
+            resistance.append("смягчённое называние цены происходит уже после утечки ценности в бесплатность")
+            phrasing.append("если смягчённая цена появляется уже после бесплатной фазы, усиливать различение в сторону free_value_leakage, а не underpricing_visibility_avoidance")
+            sabotage_point = "снова смягчить поздний денежный переход вместо того, чтобы вовремя обозначить платный шаг"
+        if has_soft_price and not has_free_value:
+            cues.append("первичный сбой находится в прямом назывании цены, а не в утечке ценности в бесплатность")
+            resistance.append("цена смягчается или размывается без выраженной бесплатной фазы до этого")
+            phrasing.append("не относить кейс к free_value_leakage без явной бесплатной фазы до денежного перехода")
         if not cues:
             cues.append("язык удержания маленького масштаба")
             prohibitions.append("рост может ощущаться как риск потери устойчивости")
@@ -494,6 +493,31 @@ class CycleEngine:
 
     def _has_any(self, text: str, *tokens: str) -> bool:
         return any(token in text for token in tokens)
+
+    def _has_affirmed_free_value_phase(self, text: str) -> bool:
+        has_free_value_signal = self._has_any(
+            text,
+            "бесплат",
+            "до оплат",
+            "до сделки",
+            "разбор",
+            "консульт",
+            "совет",
+            "даю решение",
+            "много помогаю",
+            "полезн",
+        )
+        has_negated_free_value = self._has_any(
+            text,
+            "не отдаю бесплатно",
+            "не отдавал бесплатно",
+            "не даю бесплатно",
+            "не было бесплат",
+            "без бесплат",
+            "не отдаю ценность",
+            "бесплатную ценность заранее не отдаю",
+        )
+        return has_free_value_signal and not has_negated_free_value
 
     def _generate_old_cycle_map(self, diagnosis: dict[str, Any]) -> dict[str, Any]:
         result_by_mechanism = {

@@ -11,7 +11,8 @@
 | F-006 | Russian LLM Intelligence Upgrade | Complete | Russian-localized LLM-backed slice implemented and accepted as the new runnable baseline. |
 | F-007 | Real Case Quality Pass | Complete | Accepted offline/fallback quality-strengthening packet for the Russian money/income case set. |
 | F-008 | Live LLM Calibration Pass | Complete | Accepted live calibration packet for the primary LLM meaning layer under deterministic validation and fallback. |
-| F-009 | Communication DNA Quality Uplift | Active | DNA support was tightened for nearby money-mechanism distinctions; targeted before/after review completed; awaiting manager review. |
+| F-009 | Communication DNA Quality Uplift | Complete | Accepted targeted DNA support uplift around the free-value versus delayed-money boundary. |
+| F-010 | Late Paid Boundary Adjacency Pass | Active | Narrow adjacency pass completed around free-value leakage versus underpricing after free help; awaiting manager review. |
 
 ## Ledger Rule
 - Only one task may hold `Active` status.

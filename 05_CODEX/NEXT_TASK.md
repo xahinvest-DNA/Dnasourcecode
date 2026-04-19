@@ -1,23 +1,27 @@
 # Active Packet
 
 ## Packet ID
-`F-009`
+`F-010`
 
 ## Title
-Communication DNA Quality Uplift
+Late Paid Boundary Adjacency Pass
 
 ## Status
 Active until manager review closes the packet.
 
 ## Objective
-Strengthen Communication DNA as a diagnostic support layer for still-weak nearby money/income mechanism distinctions.
+Narrowly improve the distinction between `free_value_leakage` and `underpricing_visibility_avoidance` around late paid boundary after free help.
 
 ## In Scope
-- Improve DNA support signals specifically for weak nearby mechanism distinctions.
-- Keep Communication DNA inside its accepted support role.
-- Strengthen the signal quality passed into diagnosis without changing module ownership.
-- Add regression tests for still-confusable mechanism pairs.
-- Measure whether stronger DNA support improves live-vs-fallback behavior on the targeted cases.
+- Narrowly strengthen Communication DNA support signals on this exact adjacency edge.
+- Narrowly refine diagnosis support if needed without changing ownership.
+- Improve distinction for:
+  - late paid boundary after free help
+  - free help first, then blurred price ask
+  - valuable unpaid help followed by softened or delayed price naming
+  - price avoidance without real free-value leakage
+- Add regression coverage for this adjacency cluster.
+- Compare targeted live and fallback behavior on the new edge cases.
 
 ## Out of Scope
 - product-flow rewrite
@@ -28,21 +32,23 @@ Strengthen Communication DNA as a diagnostic support layer for still-weak nearby
 - production infra
 - free chat interface
 - major UI redesign
-- module rewrite
-- state-model rewrite
-- large prompt-system redesign outside the targeted weak distinctions
+- broad DNA redesign
+- action-layer redesign
+- widening to other mechanism clusters
 
 ## Required Deliverables
-- one targeted DNA review document with before/after findings
-- improved DNA support generation for the targeted weak cases
-- updated regression tests
+- one review document with before/after on the targeted late-paid-boundary edge cases
+- updated `runtime/engine.py` only where it directly helps this distinction
+- updated `runtime/meaning.py` only in the narrow diagnosis-support section if needed
+- new regression tests for this adjacency cluster
 - supporting state sync in `01_MASTER/CURRENT_STATE.md`, `05_CODEX/TASKS.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/CODEX_WORKLOG.md`
 
 ## Completion Criteria
-- The targeted weak DNA cases are retested.
-- Communication DNA support quality improves on the targeted nearby mechanism distinctions.
+- The targeted edge cases are retested.
+- Distinction quality improves specifically on `free_value_leakage` versus `underpricing_visibility_avoidance`.
+- Fallback behavior is explicitly checked.
 - Deterministic guardrails still hold.
-- Repeated weak distinction points have regression coverage.
+- No regression appears on already accepted clear cases.
 - Supporting state files are synchronized after execution.
 
 ## Sync Requirement

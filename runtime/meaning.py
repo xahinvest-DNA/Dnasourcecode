@@ -287,6 +287,29 @@ class HeuristicRussianMeaningGenerator(MeaningGeneratorProtocol):
         ).lower()
 
     def _detect_mechanism(self, text: str) -> str:
+        has_free_value_phase = self._has_affirmed_free_value_phase(text)
+        has_late_paid_boundary = self._score(
+            text,
+            "до оплат",
+            "до сделки",
+            "потом",
+            "позже",
+            "перенош",
+            "теряю момент",
+            "платный формат",
+            "платном формате",
+        )
+        has_soft_price = self._score(
+            text,
+            "смягча",
+            "бонус",
+            "не называ",
+            "не наз",
+            "мягко",
+            "намека",
+            "размываю границу",
+            "осторожно",
+        )
         scores = {
             "money_through_strain": self._score(
                 text,
@@ -390,6 +413,10 @@ class HeuristicRussianMeaningGenerator(MeaningGeneratorProtocol):
                 "маленькие действия",
             ),
         }
+        if has_free_value_phase and (has_late_paid_boundary or has_soft_price):
+            scores["free_value_leakage"] += 5
+        if not has_free_value_phase and has_soft_price:
+            scores["underpricing_visibility_avoidance"] += 4
         best_mechanism = max(scores, key=scores.get)
         if scores[best_mechanism] <= 0:
             return "safety_in_smallness"
@@ -397,6 +424,35 @@ class HeuristicRussianMeaningGenerator(MeaningGeneratorProtocol):
 
     def _score(self, text: str, *tokens: str) -> int:
         return sum(1 for token in tokens if token in text)
+
+    def _has_affirmed_free_value_phase(self, text: str) -> bool:
+        has_free_value_signal = any(
+            token in text
+            for token in (
+                "бесплат",
+                "до оплат",
+                "до сделки",
+                "разбор",
+                "консульт",
+                "совет",
+                "даю решение",
+                "много помогаю",
+                "полезн",
+            )
+        )
+        has_negated_free_value = any(
+            token in text
+            for token in (
+                "не отдаю бесплатно",
+                "не отдавал бесплатно",
+                "не даю бесплатно",
+                "не было бесплат",
+                "без бесплат",
+                "не отдаю ценность",
+                "бесплатную ценность заранее не отдаю",
+            )
+        )
+        return has_free_value_signal and not has_negated_free_value
 
 
 @dataclass
@@ -452,6 +508,10 @@ class OpenAIResponsesMeaningGenerator(MeaningGeneratorProtocol):
             "это сильнее тянет к free_value_leakage. "
             "Если delay возникает уже после бесплатно отданной ценности, это всё ещё сильнее тянет к free_value_leakage, "
             "а не к deferred_money_conversation. "
+            "Если после бесплатно отданной ценности цена потом называется мягко, размыто или с бонусами, "
+            "это всё ещё сильнее тянет к free_value_leakage, потому что первичный сбой уже произошёл в платной границе. "
+            "Если же выраженной бесплатной фазы не было, а главный сбой в том, что цена, сумма или оффер не называются прямо, "
+            "это сильнее тянет к underpricing_visibility_avoidance. "
             "Если DNA указывает, что разговор о деньгах, повышении, компенсации или пересмотре откладывается под видом 'надо ещё доказать ценность', "
             "это сильнее тянет к deferred_money_conversation. "
             "Не путай эти два соседних механизма только потому, что в обоих есть избегание денег. "

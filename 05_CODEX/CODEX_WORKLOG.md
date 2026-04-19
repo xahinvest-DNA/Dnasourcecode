@@ -94,3 +94,13 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: Communication DNA remains a support layer only; the best measured improvement was that live diagnosis moved from `deferred_money_conversation` to `free_value_leakage` on the targeted free-value boundary cases.
 - Recommended next step: manager review of the DNA uplift and, if accepted, open one more narrow packet only for the remaining late-paid-boundary adjacency with `underpricing_visibility_avoidance`.
+
+## Entry 011
+- Date: 2026-04-19
+- Packet: `F-010 Late Paid Boundary Adjacency Pass`
+- Result: narrowly fixed the late-paid-boundary adjacency between `free_value_leakage` and `underpricing_visibility_avoidance`, especially on the fallback side, by making DNA support and heuristic distinction sensitive to whether a real unpaid-value phase already happened before softened or delayed price naming.
+- Created: `05_CODEX/F010_LATE_PAID_BOUNDARY_REVIEW.md`
+- Updated: `runtime/engine.py`, `runtime/meaning.py`, `tests/test_cycle_engine.py`, `01_MASTER/CURRENT_STATE.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/TASKS.md`, `05_CODEX/CODEX_WORKLOG.md`
+- State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: this was a narrow adjacency pass, not a broader redesign; the key measured win was that `late_paid_boundary_after_free_help` moved from `underpricing_visibility_avoidance` to `free_value_leakage` on the fallback side while accepted clear cases stayed stable.
+- Recommended next step: manager review of the adjacency pass and, if needed, open a separate packet for a different mechanism edge rather than widening this one further.

@@ -2,7 +2,7 @@
 
 ## Status
 - Date: 2026-04-19
-- Active frontier: `F-009 Communication DNA Quality Uplift`
+- Active frontier: `F-010 Late Paid Boundary Adjacency Pass`
 - Current repository role: documentation-first source-of-truth and execution control system
 - Runtime status: minimal local runtime slice exists; no production backend, multi-user layer, or infrastructure is opened yet
 
@@ -29,22 +29,24 @@
 - Real-case quality review has now been executed against 8 Russian money/income cases, with strengthened fallback meaning quality, tighter action-quality guardrails, and regression coverage for the main weak patterns found.
 - Live LLM calibration has now been executed against the accepted 8-case Russian set, with prompt tightening, stronger diagnosis/action validation, and direct live-vs-fallback comparison recorded.
 - Communication DNA support has now been tightened specifically for weak nearby money-mechanism distinctions around free value leakage versus deferred money conversation.
+- A narrow adjacency pass has now tightened the remaining `free_value_leakage` versus `underpricing_visibility_avoidance` edge around late paid boundary after free help.
 - Codex execution rules, active packet discipline, and handoff structure are now explicit.
 - `F-003`, `F-003a`, `F-004`, and `F-005` are complete.
 - `F-006` is complete.
 - `F-007` is complete.
 - `F-008` is complete.
-- `F-009` is complete from the Codex side and awaiting manager review.
+- `F-009` is complete.
+- `F-010` is complete from the Codex side and awaiting manager review.
 
 ## Open Items
 - Confirm the preferred external product naming for user-facing language.
-- Decide the next bounded packet after reviewing the DNA uplift pass.
+- Decide the next bounded packet after reviewing the late-paid-boundary adjacency pass.
 - Replace or deepen the local heuristic DNA support only if a later packet explicitly opens that work.
-- Decide whether the next quality packet should focus on the remaining late-paid-boundary adjacency, another narrow DNA cluster, or broader Russian case coverage.
+- Decide whether the next quality packet should focus on one different adjacency cluster or pause quality expansion.
 
 ## Next Step
-- Manager review of `F-009 Communication DNA Quality Uplift`.
-- If accepted, keep the next packet tightly scoped to one remaining mechanism-confusion edge rather than widening product scope.
+- Manager review of `F-010 Late Paid Boundary Adjacency Pass`.
+- If accepted, keep the next packet as a separate narrow adjacency packet rather than widening this edge further.
 
 ## Execution Model
 - ChatGPT owns direction, prioritization, packet definition, and final decision-making.

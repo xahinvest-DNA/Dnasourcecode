@@ -311,6 +311,32 @@ class CycleEngineTests(unittest.TestCase):
         self.assertIn("бесплат", combined)
         self.assertTrue(any(token in combined for token in ("платн", "разговор", "доказ")))
 
+    def test_dna_support_marks_late_soft_price_after_free_help_as_boundary_failure(self) -> None:
+        intake = self._build_intake(
+            problem_summary="Я сначала подробно помогаю клиенту бесплатно, чтобы показать пользу.",
+            repeated_pattern_summary="Когда потом доходит до оплаты, я не называю цену прямо, а мягко намекаю на платный пакет и снова размываю границу.",
+            desired_shift="Хочу не терять платную границу после уже отданной ценности.",
+        )
+        dna = self.engine._generate_dna_support(intake)
+        combined = " ".join(
+            dna["hidden_structure_cues"] + dna["resistance_pattern_notes"] + dna["phrasing_constraints"] + [dna["likely_self_sabotage_point"]]
+        ).lower()
+        self.assertIn("бесплат", combined)
+        self.assertTrue(any(token in combined for token in ("смягч", "размыв", "границ", "платн")))
+
+    def test_dna_support_does_not_fake_free_value_when_user_denies_it(self) -> None:
+        intake = self._build_intake(
+            problem_summary="Я почти сразу дохожу до обсуждения работы с клиентом, но мне трудно назвать сумму прямо.",
+            repeated_pattern_summary="Я смягчаю оффер, добавляю бонусы и боюсь уверенно назвать цену, хотя бесплатную ценность заранее не отдаю.",
+            desired_shift="Хочу говорить цену прямее без смягчения.",
+        )
+        dna = self.engine._generate_dna_support(intake)
+        combined = " ".join(
+            dna["hidden_structure_cues"] + dna["resistance_pattern_notes"] + dna["phrasing_constraints"] + [dna["likely_self_sabotage_point"]]
+        ).lower()
+        self.assertTrue(any(token in combined for token in ("цен", "сумм", "оффер", "смягч", "прям")))
+        self.assertNotIn("бесплатная польза растягивается раньше платной границы", combined)
+
     def test_stub_llm_can_drive_full_cycle(self) -> None:
         engine = self._engine_with_generator(StubMeaningGenerator())
         cycle = engine.create_cycle(
@@ -471,6 +497,38 @@ class CycleEngineTests(unittest.TestCase):
             problem_summary="Я много помогаю потенциальным клиентам до сделки и часто даю подробные разборы бесплатно.",
             repeated_pattern_summary="Потом говорю себе, что сначала надо еще сильнее показать ценность, и откладываю переход к платному предложению.",
             desired_shift="Хочу раньше переводить разговор в платный шаг.",
+        )
+        self.assertEqual(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], "free_value_leakage")
+
+    def test_free_help_then_soft_price_prefers_free_value_leakage(self) -> None:
+        cycle = self.engine.create_cycle(
+            problem_summary="Я сначала подробно помогаю клиенту бесплатно, чтобы показать пользу.",
+            repeated_pattern_summary="Когда потом доходит до оплаты, я не называю цену прямо, а мягко намекаю на платный пакет и снова размываю границу.",
+            desired_shift="Хочу не терять платную границу после уже отданной ценности.",
+        )
+        self.assertEqual(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], "free_value_leakage")
+
+    def test_late_paid_boundary_after_free_help_prefers_free_value_leakage(self) -> None:
+        cycle = self.engine.create_cycle(
+            problem_summary="Я быстро вхожу в помощь, разбираю ситуацию клиента и даю решения еще до оплаты.",
+            repeated_pattern_summary="Потом мне кажется, что просить деньги уже неудобно, и я переношу разговор о платном формате на потом.",
+            desired_shift="Хочу раньше обозначать границу между бесплатным контактом и оплатой.",
+        )
+        self.assertEqual(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], "free_value_leakage")
+
+    def test_pure_underpricing_without_leakage_stays_underpricing(self) -> None:
+        cycle = self.engine.create_cycle(
+            problem_summary="Я почти сразу дохожу до обсуждения работы с клиентом, но мне трудно назвать сумму прямо.",
+            repeated_pattern_summary="Я смягчаю оффер, добавляю бонусы и боюсь уверенно назвать цену, хотя бесплатную ценность заранее не отдаю.",
+            desired_shift="Хочу говорить цену прямее без смягчения.",
+        )
+        self.assertEqual(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], "underpricing_visibility_avoidance")
+
+    def test_free_value_leakage_without_price_fear_center_stays_free_value_leakage(self) -> None:
+        cycle = self.engine.create_cycle(
+            problem_summary="Я не так боюсь самих цифр, но к моменту разговора о деньгах уже успеваю бесплатно разобрать половину задачи клиента.",
+            repeated_pattern_summary="Платный переход возникает слишком поздно, потому что основная ценность уже была отдана до оплаты.",
+            desired_shift="Хочу раньше переводить контакт в платный следующий шаг.",
         )
         self.assertEqual(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], "free_value_leakage")
 
