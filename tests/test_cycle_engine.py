@@ -127,6 +127,19 @@ class CycleEngineTests(unittest.TestCase):
         )
         return CycleEngine(self.store, meaning_generator=composite)
 
+    def _build_intake(self, problem_summary: str, repeated_pattern_summary: str, desired_shift: str = "") -> dict:
+        return {
+            "artifact_id": "intake-test",
+            "cycle_id": "cycle-test",
+            "captured_at": self.engine._now(),
+            "problem_summary": problem_summary,
+            "repeated_pattern_summary": repeated_pattern_summary,
+            "candidate_belief_language": self.engine._extract_candidate_beliefs(problem_summary, repeated_pattern_summary),
+            "candidate_behavior_clues": self.engine._extract_behavior_clues(problem_summary, repeated_pattern_summary),
+            "intake_completeness_flag": True,
+            "source_excerpt": desired_shift,
+        }
+
     def test_create_cycle_generates_artifacts_in_order(self) -> None:
         cycle = self.engine.create_cycle(
             problem_summary="Я много работаю, но доход почти не растёт.",
@@ -258,6 +271,45 @@ class CycleEngineTests(unittest.TestCase):
                 "safety_in_smallness",
             },
         )
+
+    def test_dna_support_marks_free_value_leakage_boundary(self) -> None:
+        intake = self._build_intake(
+            problem_summary="Люди часто просят у меня совет по маркетингу, я много помогаю бесплатно, а потом остаюсь без продаж.",
+            repeated_pattern_summary="Мне неудобно быстро переводить разговор в деньги, поэтому я сначала отдаю много ценности, а потом теряю момент.",
+            desired_shift="Хочу раньше обозначать платный формат.",
+        )
+        dna = self.engine._generate_dna_support(intake)
+        combined = " ".join(
+            dna["hidden_structure_cues"] + dna["resistance_pattern_notes"] + dna["phrasing_constraints"] + [dna["likely_self_sabotage_point"]]
+        ).lower()
+        self.assertIn("бесплат", combined)
+        self.assertTrue(any(token in combined for token in ("платн", "оплат", "границ")))
+
+    def test_dna_support_marks_deferred_money_conversation_boundary(self) -> None:
+        intake = self._build_intake(
+            problem_summary="Я тяну больше ответственности в компании, но уже давно не поднимал вопрос о компенсации.",
+            repeated_pattern_summary="Каждый раз думаю, что надо еще немного доказать ценность, и откладываю разговор о деньгах.",
+            desired_shift="Хочу подготовить один ясный разговор о пересмотре дохода.",
+        )
+        dna = self.engine._generate_dna_support(intake)
+        combined = " ".join(
+            dna["hidden_structure_cues"] + dna["prohibition_signals"] + dna["resistance_pattern_notes"] + dna["phrasing_constraints"] + [dna["likely_self_sabotage_point"]]
+        ).lower()
+        self.assertTrue(any(token in combined for token in ("доказ", "компенсац", "разговор")))
+        self.assertTrue(any(token in combined for token in ("отклады", "потом", "перенос")))
+
+    def test_dna_support_overlap_case_marks_free_and_delay_together(self) -> None:
+        intake = self._build_intake(
+            problem_summary="Я много помогаю потенциальным клиентам до сделки и часто даю подробные разборы бесплатно.",
+            repeated_pattern_summary="Потом говорю себе, что сначала надо еще сильнее показать ценность, и откладываю переход к платному предложению.",
+            desired_shift="Хочу раньше переводить разговор в платный шаг.",
+        )
+        dna = self.engine._generate_dna_support(intake)
+        combined = " ".join(
+            dna["hidden_structure_cues"] + dna["resistance_pattern_notes"] + dna["phrasing_constraints"] + [dna["likely_self_sabotage_point"]]
+        ).lower()
+        self.assertIn("бесплат", combined)
+        self.assertTrue(any(token in combined for token in ("платн", "разговор", "доказ")))
 
     def test_stub_llm_can_drive_full_cycle(self) -> None:
         engine = self._engine_with_generator(StubMeaningGenerator())
@@ -413,6 +465,14 @@ class CycleEngineTests(unittest.TestCase):
                 for token in ("один", "одна", "отправ", "назван", "инициирован", "выполнен", "озвучен")
             )
         )
+
+    def test_overlap_case_prefers_free_value_leakage_over_generic_delay(self) -> None:
+        cycle = self.engine.create_cycle(
+            problem_summary="Я много помогаю потенциальным клиентам до сделки и часто даю подробные разборы бесплатно.",
+            repeated_pattern_summary="Потом говорю себе, что сначала надо еще сильнее показать ценность, и откладываю переход к платному предложению.",
+            desired_shift="Хочу раньше переводить разговор в платный шаг.",
+        )
+        self.assertEqual(cycle["diagnosis_output"]["leading_mechanism_hypothesis"], "free_value_leakage")
 
 
 if __name__ == "__main__":

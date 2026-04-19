@@ -84,3 +84,13 @@
 - State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
 - Notes: live LLM quality improved materially after calibration, but it still requires deterministic validation and fallback; it is not trustworthy enough yet as an unguarded standalone meaning layer.
 - Recommended next step: manager review of the live calibration pass and, if accepted, open a narrow quality packet for either `Communication DNA` uplift or one more targeted live calibration pass around remaining mechanism confusion.
+
+## Entry 010
+- Date: 2026-04-19
+- Packet: `F-009 Communication DNA Quality Uplift`
+- Result: strengthened Communication DNA support for the weak `free_value_leakage` versus `deferred_money_conversation` boundary and verified targeted before/after improvement in live diagnosis behavior without changing module ownership or product flow.
+- Created: `05_CODEX/F009_DNA_REVIEW.md`
+- Updated: `runtime/engine.py`, `runtime/meaning.py`, `tests/test_cycle_engine.py`, `01_MASTER/CURRENT_STATE.md`, `05_CODEX/NEXT_TASK.md`, `05_CODEX/TASKS.md`, `05_CODEX/CODEX_WORKLOG.md`
+- State sync: `CURRENT_STATE.md`, `TASKS.md`, `NEXT_TASK.md`, and `CODEX_WORKLOG.md` were aligned.
+- Notes: Communication DNA remains a support layer only; the best measured improvement was that live diagnosis moved from `deferred_money_conversation` to `free_value_leakage` on the targeted free-value boundary cases.
+- Recommended next step: manager review of the DNA uplift and, if accepted, open one more narrow packet only for the remaining late-paid-boundary adjacency with `underpricing_visibility_avoidance`.

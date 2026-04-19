@@ -416,6 +416,10 @@ class CycleEngine:
             clues.append("добавляет усилие вместо смены способа получения результата")
         if any(token in text for token in ("цен", "прос", "оффер", "предлож", "прода")):
             clues.append("смягчает цену или избегает прямого денежного запроса")
+        if any(token in text for token in ("бесплат", "до оплат", "до сделки", "платн", "разбор", "консульт")):
+            clues.append("сначала даёт ценность, а платный переход обозначает слишком поздно")
+        if any(token in text for token in ("отклады", "надо еще", "надо ещё", "доказать ценность", "пересмотр", "компенсац", "зарплат")):
+            clues.append("откладывает денежный разговор под видом дополнительного доказательства ценности")
         if not clues:
             clues.append("удерживает знакомый низкий потолок как будто он безопаснее")
         return clues[:2]
@@ -426,6 +430,27 @@ class CycleEngine:
         prohibitions: list[str] = []
         resistance: list[str] = []
         phrasing: list[str] = []
+        sabotage_point = "возврат к знакомому способу выживания вместо одного чистого шага"
+
+        has_overload = self._has_any(text, "тяж", "впах", "паш", "выжива", "усили")
+        has_price_tension = self._has_any(text, "цен", "прос", "откаж", "прода", "оффер", "деньг")
+        has_free_value = self._has_any(
+            text,
+            "бесплат",
+            "до оплат",
+            "до сделки",
+            "разбор",
+            "консульт",
+            "совет",
+            "даю решение",
+            "много помогаю",
+            "полезн",
+        )
+        has_paid_boundary = self._has_any(text, "платн", "оплат", "деньги", "стоимость", "предложени")
+        has_delay = self._has_any(text, "отклады", "потом", "позже", "перенош", "не поднимал", "следующ")
+        has_proof_loop = self._has_any(text, "доказать ценность", "надо еще", "надо ещё", "еще доказ", "ещё доказ", "сначала надо")
+        has_compensation_context = self._has_any(text, "компенсац", "пересмотр", "повышен", "зарплат", "условий")
+
         if any(token in text for token in ("тяж", "впах", "паш", "выжива", "усили")):
             cues.append("язык перегруза и заслуживания")
             prohibitions.append("получать легче ощущается небезопасно")
@@ -434,6 +459,24 @@ class CycleEngine:
             cues.append("напряжение вокруг запроса и цены")
             resistance.append("ясный запрос может активировать страх отказа")
             phrasing.append("говорить конкретно о ценности, а не общими лозунгами")
+        if has_free_value and has_paid_boundary:
+            cues.append("бесплатная польза растягивается раньше платной границы")
+            prohibitions.append("ранний переход в деньги ощущается как риск разрушить контакт")
+            resistance.append("момент платного перехода теряется после слишком длинной бесплатной помощи")
+            phrasing.append("не смешивать поздний денежный разговор с утечкой ценности через бесплатность")
+            sabotage_point = "снова дать ещё одну полезную бесплатную подсказку вместо платного следующего шага"
+        if has_delay and (has_proof_loop or has_compensation_context):
+            cues.append("денежный разговор переносится на потом под видом дополнительного доказательства ценности")
+            prohibitions.append("о деньгах можно говорить только после ещё большего доказательства ценности")
+            resistance.append("подготовка и доказательство ценности заменяют сам денежный разговор")
+            phrasing.append("не сводить откладывание денежного разговора к общей тревоге вокруг цены")
+            sabotage_point = "снова решить, что сначала надо ещё доказать ценность, а потом уже говорить о деньгах"
+        if has_free_value and has_delay:
+            cues.append("платный переход запаздывает: бесплатная отдача и перенос разговора о деньгах накладываются друг на друга")
+            cues.append("первичный сбой происходит в точке платной границы уже после бесплатно отданной ценности")
+            resistance.append("после бесплатной пользы разговор о деньгах переносится, как будто право на платный шаг ещё не возникло")
+            phrasing.append("если delay возник уже после бесплатно отданной ценности, усиливать различение в сторону free_value_leakage, а не deferred_money_conversation")
+            sabotage_point = "снова отдать ценность бесплатно и отложить платный переход ещё на один круг контакта"
         if not cues:
             cues.append("язык удержания маленького масштаба")
             prohibitions.append("рост может ощущаться как риск потери устойчивости")
@@ -442,12 +485,15 @@ class CycleEngine:
             "artifact_id": f"dna-{uuid4().hex[:10]}",
             "cycle_id": intake["cycle_id"],
             "generated_at": self._now(),
-            "hidden_structure_cues": cues[:2],
+            "hidden_structure_cues": cues[:4],
             "prohibition_signals": prohibitions[:1],
-            "resistance_pattern_notes": resistance[:1] or ["базовое сопротивление: возврат к привычному низкому потолку"],
-            "likely_self_sabotage_point": "возврат к знакомому способу выживания вместо одного чистого шага",
-            "phrasing_constraints": phrasing[:2],
+            "resistance_pattern_notes": resistance[:2] or ["базовое сопротивление: возврат к привычному низкому потолку"],
+            "likely_self_sabotage_point": sabotage_point,
+            "phrasing_constraints": phrasing[:3],
         }
+
+    def _has_any(self, text: str, *tokens: str) -> bool:
+        return any(token in text for token in tokens)
 
     def _generate_old_cycle_map(self, diagnosis: dict[str, Any]) -> dict[str, Any]:
         result_by_mechanism = {
